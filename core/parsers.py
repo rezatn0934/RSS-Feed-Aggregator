@@ -173,3 +173,35 @@ class PodcastParser(Parser):
         parse_xml_and_create_records(): Parse the entire XML and create records for podcasts.
     """
 
+    def item_parser(self, item):
+        """
+        Parse an individual podcast item.
+
+        Args:
+            item (Element): The XML element representing a podcast item.
+
+        Returns:
+            dict: Parsed data from the podcast item.
+        """
+        title = self.get_element_text(item, 'title')
+        subtitle = self.get_element_text(item, 'itunes:subtitle')
+        description = self.get_element_text(item, 'description')
+        guid = self.get_element_text(item, 'guid')
+        pub_date_str = self.get_element_text(item, 'pubDate')
+        pub_date = self.parse_date(pub_date_str)
+        duration = self.get_element_text(item, 'itunes:duration')
+        audio_file = self.get_element_attr(item, 'enclosure', 'url')
+        image = self.get_element_attr(item, 'itunes:image', 'href')
+        explicit = True if (self.get_element_text(item, 'itunes:explicit')).lower() in ('yes' or 'true') else False
+
+        return {
+            'title': title,
+            'subtitle': subtitle,
+            'description': description,
+            'guid': guid,
+            'pub_date': pub_date,
+            'duration': duration,
+            'audio_file': audio_file,
+            'image': image,
+            'explicit': explicit
+        }
