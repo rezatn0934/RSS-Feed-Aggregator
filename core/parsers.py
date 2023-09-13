@@ -38,3 +38,16 @@ class Parser(ABC):
         self.content_namespace = {'content': 'http://purl.org/rss/1.0/modules/content/'}
         self.root = ET.fromstring(xml_data)
         self.channel_data = self.root.find('channel')
+
+    @abstractmethod
+    def item_parser(self, item):
+        """
+        Abstract method to parse individual items within the XML.
+
+        Args:
+            item (Element): The XML element representing an item.
+
+        Returns:
+            dict: Parsed data from the item.
+        """
+        pass
