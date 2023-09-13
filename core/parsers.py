@@ -205,3 +205,18 @@ class PodcastParser(Parser):
             'image': image,
             'explicit': explicit
         }
+
+    def parse_xml_and_create_records(self):
+        """
+        Parse the entire XML and create records for podcasts.
+
+        Returns:
+            dict: Parsed data including channel data and a list of podcast items.
+        """
+        channel_data = self.parse_channel()
+        items = list()
+        for item in self.channel_data.findall('item'):
+            item_data = self.item_parser(item)
+            items.append(item_data)
+
+        return {'channel_data': channel_data, 'podcast_data': items}
