@@ -162,3 +162,14 @@ class Parser(ABC):
             'owner': owner,
             'category': categories
         }
+
+
+class PodcastParser(Parser):
+    """
+    Parser for podcast XML data.
+
+    Methods:
+        item_parser(item): Parse an individual podcast item.
+        parse_xml_and_create_records(): Parse the entire XML and create records for podcasts.
+    """
+
