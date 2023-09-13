@@ -87,3 +87,18 @@ class Parser(ABC):
                 self.get_categories(category_element, child_category)
 
         return parent_list
+
+    def get_element_text(self, element, tag):
+        """
+        Get the text content of a sub-element within an element.
+
+        Args:
+            element (Element): The parent element.
+            tag (str): The tag name of the sub-element.
+
+        Returns:
+            str: The text content of the sub-element, or an empty string if not found.
+        """
+        sub_element = element.find(tag, namespaces=self.itunes_namespace)
+        return sub_element.text if sub_element is not None else ''
+
