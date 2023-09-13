@@ -61,3 +61,29 @@ class Parser(ABC):
             dict: Parsed data from the channel and items.
         """
         pass
+
+    def get_categories(self, element, parent=None, parent_list=None):
+        """
+        Get a hierarchical structure of <itunes:category> elements within an element.
+
+        Args:
+            element (Element): The parent element.
+            parent (Category or None): The parent category.
+            :param element:
+            :param parent:
+            :param parent_list:
+        Returns:
+            Category: A hierarchical structure of categories.
+        """
+        if parent_list is None:
+            parent_list = []
+        tag = 'itunes:category'
+        category_elements = element.findall(tag, namespaces=self.itunes_namespace)
+        for category_element in category_elements:
+            name = category_element.attrib.get("text")
+            child_category = CategoryNode(name, parent)
+            parent_list.append(child_category)
+            if category_element.findall(tag, namespaces=self.itunes_namespace):
+                self.get_categories(category_element, child_category)
+
+        return parent_list
