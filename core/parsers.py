@@ -102,3 +102,19 @@ class Parser(ABC):
         sub_element = element.find(tag, namespaces=self.itunes_namespace)
         return sub_element.text if sub_element is not None else ''
 
+    @staticmethod
+    def get_element_attr(element, tag, attr):
+        """
+        Get the attribute value of a sub-element within an element.
+
+        Args:
+            element (Element): The parent element.
+            tag (str): The tag name of the sub-element.
+            attr (str): The name of the attribute.
+
+        Returns:
+            str: The attribute value, or an empty string if not found.
+        """
+        sub_element = element.find(tag)
+        return sub_element.attrib.get(attr) if sub_element is not None else ''
+
