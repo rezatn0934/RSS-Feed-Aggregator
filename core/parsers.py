@@ -51,3 +51,13 @@ class Parser(ABC):
             dict: Parsed data from the item.
         """
         pass
+
+    @abstractmethod
+    def parse_xml_and_create_records(self):
+        """
+        Abstract method to parse the entire XML and create records.
+
+        Returns:
+            dict: Parsed data from the channel and items.
+        """
+        pass
