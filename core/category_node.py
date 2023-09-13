@@ -32,7 +32,7 @@ class Node(ABC):
         yield (self, self.children)
 
 
-class Category(Node):
+class CategoryNode(Node):
     def __init__(self, name, parent=None):
         super().__init__(parent)
         self.name = name
