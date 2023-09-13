@@ -118,3 +118,17 @@ class Parser(ABC):
         sub_element = element.find(tag)
         return sub_element.attrib.get(attr) if sub_element is not None else ''
 
+    def parse_date(self, date_str):
+        """
+        Parse a date string into a datetime object.
+
+        Args:
+            date_str (str): The date string in a specific format.
+
+        Returns:
+            datetime: A datetime object representing the parsed date, or None if date_str is empty.
+        """
+        if date_str:
+            return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
+        return None
+
