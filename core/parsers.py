@@ -132,3 +132,33 @@ class Parser(ABC):
             return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
         return None
 
+    def parse_channel(self):
+        """
+        Parse the channel data from the XML.
+
+        Returns:
+            dict: Parsed channel data.
+        """
+        title = self.get_element_text(self.channel_data, 'title')
+        description = self.get_element_text(self.channel_data, 'description')
+        pub_date_str = self.get_element_text(self.channel_data, 'pubDate')
+        pub_date = self.parse_date(pub_date_str)
+        language = self.get_element_text(self.channel_data, 'language')
+        subtitle = self.get_element_text(self.channel_data, 'itunes:subtitle')
+        image = self.get_element_attr(self.channel_data, 'itunes:image', 'href')
+        author = self.get_element_text(self.channel_data, 'itunes:author')
+        source = self.get_element_text(self.channel_data, 'link')
+        owner = self.get_element_text(self.channel_data, 'itunes:owner/itunes:name')
+        categories = self.get_categories(self.channel_data)
+        return {
+            'title': title,
+            'description': description,
+            'pub_date': pub_date,
+            'language': language,
+            'subtitle': subtitle,
+            'image': image,
+            'author': author,
+            'source': source,
+            'owner': owner,
+            'category': categories
+        }
