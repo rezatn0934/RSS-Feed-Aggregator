@@ -21,12 +21,13 @@ class Channel(models.Model):
     category = models.ManyToManyField(Category, blank=True)
     owner = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.title
+
 
 class AbstractRssItem(models.Model):
     title = models.CharField(max_length=250)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
-    link = models.URLField(max_length=500)
-    source = models.URLField(max_length=500, null=True, blank=True)
     guid = models.CharField(max_length=150)
     pub_date = models.DateTimeField(null=True, blank=True)
     image = models.URLField(max_length=500, null=True, blank=True)
