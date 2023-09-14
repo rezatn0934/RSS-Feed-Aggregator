@@ -100,3 +100,16 @@ class JWTAuthentication(authentication.BaseAuthentication):
         prefix = authorization_header.split(' ')[0]
         if prefix != self.authentication_header_prefix:
             raise exceptions.PermissionDenied('Token prefix missing')
+
+    @staticmethod
+    def get_payload_from_access_token(authorization_header):
+        try:
+            access_token = authorization_header.split(' ')[1]
+            payload = decode_jwt(access_token)
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise exceptions.NotAuthenticated('Access token expired')
+        except jwt.InvalidSignatureError as e:
+            raise exceptions.NotAcceptable(str(e))
+        except:
+            raise exceptions.ParseError()
