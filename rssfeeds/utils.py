@@ -17,3 +17,13 @@ def item_model_mapper(arg):
     }
     return choice[arg.capitalize()]
 
+
+def create_or_update_categories(categories_data):
+    categories = []
+    for category_data in categories_data:
+        parent, _ = Category.objects.get_or_create(name=category_data.name)
+        categories.append(parent)
+        for child_data in category_data.children:
+            child, _ = Category.objects.get_or_create(name=child_data.name, parent=parent)
+            categories.append(child)
+    return categories
