@@ -24,6 +24,9 @@ class Comment(models.Model):
     content_object = GenericForeignKey()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'commented by: {self.user}'
+
 
 class Subscription(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subscriptions')
