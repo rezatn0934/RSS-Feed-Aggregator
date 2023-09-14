@@ -95,3 +95,8 @@ class JWTAuthentication(authentication.BaseAuthentication):
         if not authorization_header:
             raise exceptions.NotFound('Authorization Header was not set')
         return authorization_header
+
+    def check_prefix(self, authorization_header):
+        prefix = authorization_header.split(' ')[0]
+        if prefix != self.authentication_header_prefix:
+            raise exceptions.PermissionDenied('Token prefix missing')
