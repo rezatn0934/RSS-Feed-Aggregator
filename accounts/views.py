@@ -70,3 +70,17 @@ class RefreshToken(APIView):
         }
         return Response(data, status=status.HTTP_201_CREATED)
 
+
+class LogoutView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            payload = request.auth
+            jti = payload["jti"]
+            cache.delete(jti)
+
+            return Response({"message": "Successful Logout"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
