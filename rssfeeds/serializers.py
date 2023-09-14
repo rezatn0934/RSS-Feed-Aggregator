@@ -12,3 +12,13 @@ class XmlLinkSerializer(serializers.ModelSerializer):
         }
 
 
+class ChannelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Channel
+        fields = ['id', 'title', 'description', 'last_update', 'language', 'subtitle',
+                  'image', 'author', 'xml_link', 'category', 'owner']
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
+
+
