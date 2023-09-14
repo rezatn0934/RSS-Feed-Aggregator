@@ -23,3 +23,28 @@ class UserRegister(APIView):
             return Response(ser_data.data, status=status.HTTP_201_CREATED)
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class UserLogin(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = UserLoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_identifier = serializer.validated_data.get('user_identifier')
+        password = serializer.validated_data.get('password')
+        user = AuthBackend().authenticate(request, username=user_identifier, password=password)
+        if user is None:
+            return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+        jti = jti_maker(request, user.id)
+        access_token = generate_access_token(user.id, jti)
+        refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_CACHE_TTL)
+
+        cache.set(jti, 0)
+
+        data = {
+            "access": access_token,
+            "refresh": refresh_token,
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
