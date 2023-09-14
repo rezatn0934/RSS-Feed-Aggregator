@@ -1,3 +1,4 @@
+import jwt
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework import status
@@ -97,18 +98,19 @@ class RefreshToken(APIView):
         Response: A JSON response containing new access and refresh tokens along with appropriate status codes.
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = []
 
     def post(self, request):
-        payload = request.auth
+        refresh_token = request.POST.get("refresh_token").encode("utf-8")
+        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
         user = JWTAuthentication.get_user_from_payload(payload)
         jti = payload["jti"]
         cache.delete(jti)
 
         jti = jti_maker(request, user.id)
         access_token = generate_access_token(user.id, jti)
-        refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_AUTH_TTL)
-        cache.set(jti, 0, timeout=settings.REDIS_AUTH_TTL, version=None)
+        refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_CACHE_TTL)
+        cache.set(jti, 0, timeout=settings.REDIS_CACHE_TTL, version=None)
 
         data = {
             "access": access_token,
