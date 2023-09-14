@@ -8,6 +8,9 @@ class XmlLink(models.Model):
     xml_link = models.URLField(max_length=500, unique=True)
     rss_type = models.ForeignKey(Type, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return f'{self.rss_type} //{self.xml_link}'
+
 
 class Channel(models.Model):
     title = models.CharField(max_length=255)
