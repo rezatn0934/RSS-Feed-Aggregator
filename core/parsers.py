@@ -225,19 +225,19 @@ class PodcastParser(Parser):
 
 class NewsParser(Parser):
     """
-    Parser for podcast XML data.
+    Parser for News XML data.
 
     Methods:
-        item_parser(item): Parse an individual podcast item.
-        parse_xml_and_create_records(): Parse the entire XML and create records for podcasts.
+        item_parser(item): Parse an individual News item.
+        parse_xml_and_create_records(): Parse the entire XML and create records for News.
     """
 
     def item_parser(self, item):
         """
-        Parse an individual podcast item.
+        Parse an individual News item.
 
         Args:
-            item (Element): The XML element representing a podcast item.
+            item (Element): The XML element representing a News item.
 
         Returns:
             dict: Parsed data from the News item.
