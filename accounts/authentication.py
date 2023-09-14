@@ -66,3 +66,19 @@ class JWTAuthentication(authentication.BaseAuthentication):
                 'Expired refresh token, please login again.')
         except Exception as e:
             raise exceptions.NotAcceptable(str(e))
+
+    @staticmethod
+    def get_user_from_payload(payload):
+        user_id = payload.get('user_id')
+        if user_id is None:
+            raise exceptions.NotFound('User id not found')
+
+        try:
+            user = user_model.objects.get(id=user_id)
+        except:
+            raise exceptions.NotFound('User Not Found')
+
+        if not user.is_active:
+            raise exceptions.PermissionDenied('User is inactive')
+
+        return user
