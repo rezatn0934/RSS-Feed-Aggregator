@@ -55,3 +55,14 @@ class JWTAuthentication(authentication.BaseAuthentication):
         payload = self.get_payload_from_access_token(authorization_header)
 
         return user, payload
+
+    @staticmethod
+    def get_payload_from_refresh_token(refresh_token):
+        try:
+            payload = decode_jwt(refresh_token)
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise exceptions.PermissionDenied(
+                'Expired refresh token, please login again.')
+        except Exception as e:
+            raise exceptions.NotAcceptable(str(e))
