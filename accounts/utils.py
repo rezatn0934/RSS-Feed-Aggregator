@@ -29,3 +29,8 @@ def generate_refresh_token(user_id, jti, ttl):
     refresh_token = jwt.encode(
         refresh_token_payload, settings.SECRET_KEY, algorithm='HS256')
     return refresh_token
+
+
+def jti_maker(request, user_id):
+    return f"{uuid4().hex} || {user_id} || {request.META['HTTP_USER_AGENT']} || {request.META['USERNAME']}"
+
