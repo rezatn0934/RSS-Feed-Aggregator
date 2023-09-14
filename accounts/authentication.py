@@ -29,3 +29,29 @@ class AuthBackend(ModelBackend):
         except user_model.DoesNotExist:
             return
 
+
+class JWTAuthentication(authentication.BaseAuthentication):
+    authentication_header_prefix = 'Token'
+    authentication_header_name = 'Authorization'
+
+    def authenticate_header(self, request):
+        return self.authentication_header_prefix
+
+    def authenticate(self, request):
+
+        refresh_token = request.data.get("refresh_token")
+
+        payload = self.get_payload_from_refresh_token(refresh_token)
+
+        user = self.get_user_from_payload(payload)
+
+        # if jti not in map(lambda x: x.decode("utf8"), redis_instance.keys("*")):
+        self.validate_refresh_token(payload)
+
+        authorization_header = self.get_authorization_header(request)
+
+        self.check_prefix(authorization_header)
+
+        payload = self.get_payload_from_access_token(authorization_header)
+
+        return user, payload
