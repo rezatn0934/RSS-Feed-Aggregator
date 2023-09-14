@@ -33,6 +33,9 @@ class Subscription(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='subscriptions')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.channel} subscribed by {self.user}'
+
 
 class BookMark(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookmarks')
