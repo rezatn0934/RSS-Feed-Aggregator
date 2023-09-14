@@ -1,7 +1,9 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 from . import views
 
+router = DefaultRouter()
+router.register('rssfeeds', views.XmlLinkViewSet)
+
 app_name = 'rssfeeds'
-urlpatterns = [
-    path('xml_link/', views.XmlLinkView.as_view())
-]
+urlpatterns = router.urls
