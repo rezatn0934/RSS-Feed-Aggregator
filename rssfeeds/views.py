@@ -8,10 +8,23 @@ from .models import Channel, XmlLink, Podcast, News
 from .utils import parse_podcast_data, create_or_update_categories
 
 
-# Create your views here.
-
-
 class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """
+    ViewSet for managing XmlLinks, Channels, and Podcasts.
+
+    Endpoint: CRUD operations on XmlLinks.
+    - Supports creating, retrieving, updating, and deleting XmlLinks.
+    - Upon creating a new XmlLink, it also processes associated podcast data.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing XmlLink data for creation/update.
+        *args: Additional arguments.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Response: A JSON response indicating success or failure along with appropriate status codes.
+    """
+
     serializer_class = XmlLinkSerializer
     queryset = XmlLink.objects.all()
 
@@ -42,6 +55,20 @@ class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, Retrie
 
 
 class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """
+    ViewSet for listing and retrieving Channels.
+
+    Endpoint: Listing and retrieving Channels.
+    - Supports searching and ordering based on title, last_update, description, and author.
+
+    Args:
+        None
+
+    Returns:
+        Response: A JSON response containing a list of Channels or a single Channel object
+        along with appropriate status codes.
+    """
+
     serializer_class = ChannelSerializer
     queryset = Channel.objects.all()
     filter_backends = [SearchFilter, OrderingFilter]
@@ -50,6 +77,20 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 
 class PodcastViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """
+    ViewSet for listing and retrieving Podcasts.
+
+    Endpoint: Listing and retrieving Podcasts.
+    - Supports searching and ordering based on title, pub_Date, description, and explicit flag.
+
+    Args:
+        None
+
+    Returns:
+        Response: A JSON response containing a list of Podcasts or a single Podcast object
+        along with appropriate status codes.
+    """
+
     serializer_class = PodcastSerializer
     queryset = Podcast.objects.all()
     filter_backends = [SearchFilter, OrderingFilter]
@@ -58,6 +99,20 @@ class PodcastViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 
 class NewsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """
+    ViewSet for listing and retrieving News items.
+
+    Endpoint: Listing and retrieving News items.
+    - Supports searching and ordering based on title and pub_Date.
+
+    Args:
+        None
+
+    Returns:
+        Response: A JSON response containing a list of News items or a single News item
+        along with appropriate status codes.
+    """
+
     serializer_class = NewsSerializer
     queryset = News.objects.all()
     filter_backends = [SearchFilter, OrderingFilter]
