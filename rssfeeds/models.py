@@ -40,6 +40,8 @@ class AbstractRssItem(models.Model):
 
 
 class Podcast(AbstractRssItem):
+    subtitle = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     duration = models.CharField(null=True, blank=True)
     audio_file = models.URLField(max_length=500)
     explicit = models.BooleanField(null=True, blank=True)
