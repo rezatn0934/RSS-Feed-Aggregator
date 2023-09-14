@@ -32,3 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     user_identifier = serializers.CharField()
     password = serializers.CharField()
+
+
+class RefreshTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(required=True)
