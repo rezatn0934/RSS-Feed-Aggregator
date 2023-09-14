@@ -21,3 +21,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Passwords must match!')
         return attrs
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser',
+                  'date_joined', 'last_modify']
