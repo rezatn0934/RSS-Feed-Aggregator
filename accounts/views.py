@@ -14,6 +14,21 @@ refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
 
 
 class UserRegister(APIView):
+    """
+    Register a new user.
+
+    Endpoint: POST /api/auth/register/
+    Permission: AllowAny (open to all users)
+
+    This view allows users to register by providing valid user data.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing user registration data.
+
+    Returns:
+        Response: A JSON response indicating success or failure along with appropriate status codes.
+    """
+
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -25,6 +40,22 @@ class UserRegister(APIView):
 
 
 class UserLogin(APIView):
+    """
+    Log in an existing user and issue access and refresh tokens.
+
+    Endpoint: POST /api/auth/login/
+    Permission: AllowAny (open to all users)
+
+    This view allows users to log in by providing valid credentials (username/email and password).
+    It issues an access token and a refresh token upon successful login.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing user login data.
+
+    Returns:
+        Response: A JSON response containing access and refresh tokens along with appropriate status codes.
+    """
+
     permission_classes = (AllowAny,)
     serializer_class = UserLoginSerializer
 
@@ -51,6 +82,21 @@ class UserLogin(APIView):
 
 
 class RefreshToken(APIView):
+    """
+    Refresh access and refresh tokens.
+
+    Endpoint: POST /api/auth/refresh/
+    Permission: IsAuthenticated (requires a valid access token)
+
+    This view allows users to refresh an expired access token by providing a valid refresh token.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the refresh token.
+
+    Returns:
+        Response: A JSON response containing new access and refresh tokens along with appropriate status codes.
+    """
+
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
@@ -72,6 +118,21 @@ class RefreshToken(APIView):
 
 
 class LogoutView(APIView):
+    """
+    Log out a user by invalidating their token.
+
+    Endpoint: POST /api/auth/logout/
+    Permission: IsAuthenticated (requires a valid access token)
+
+    This view allows users to log out by invalidating their token.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the access token.
+
+    Returns:
+        Response: A JSON response indicating successful logout or an error message along with appropriate status codes.
+    """
+
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
