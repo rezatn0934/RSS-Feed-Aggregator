@@ -46,4 +46,5 @@ class Podcast(AbstractRssItem):
 
 
 class News(AbstractRssItem):
-   pass
+    source = models.URLField(max_length=500, null=True, blank=True)
+    link = models.URLField(max_length=500)
