@@ -89,3 +89,9 @@ class JWTAuthentication(authentication.BaseAuthentication):
         if jti not in cache:
             raise exceptions.PermissionDenied(
                 'Invalid refresh token, please login again.')
+
+    def get_authorization_header(self, request):
+        authorization_header = request.headers.get(self.authentication_header_name)
+        if not authorization_header:
+            raise exceptions.NotFound('Authorization Header was not set')
+        return authorization_header
