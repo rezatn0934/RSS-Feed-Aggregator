@@ -40,3 +40,12 @@ class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, Retrie
 
         return Response('ok', status=status.HTTP_201_CREATED)
 
+
+class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    serializer_class = ChannelSerializer
+    queryset = Channel.objects.all()
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'last_update', 'description', 'author']
+    ordering_fields = ['id', 'title', 'last_update']
+
+
