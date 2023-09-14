@@ -22,3 +22,12 @@ class ChannelSerializer(serializers.ModelSerializer):
         }
 
 
+class PodcastSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Podcast
+        fields = ['id', 'title', 'channel', 'guid', 'pub_date', 'image',
+                  'subtitle', 'description', 'audio_file', 'explicit']
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
+
