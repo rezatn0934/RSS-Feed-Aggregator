@@ -240,7 +240,7 @@ class NewsParser(Parser):
             item (Element): The XML element representing a podcast item.
 
         Returns:
-            dict: Parsed data from the podcast item.
+            dict: Parsed data from the News item.
         """
         title = self.get_element_text(item, 'title')
         link = self.get_element_text(item, 'link')
