@@ -34,3 +34,8 @@ def generate_refresh_token(user_id, jti, ttl):
 def jti_maker(request, user_id):
     return f"{uuid4().hex} || {user_id} || {request.META['HTTP_USER_AGENT']} || {request.META['USERNAME']}"
 
+
+def decode_jwt(token):
+    payload = jwt.decode(
+        token, settings.SECRET_KEY, algorithms=['HS256'])
+    return payload
