@@ -43,3 +43,6 @@ class BookMark(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} bookmarked {self.content_object}'
