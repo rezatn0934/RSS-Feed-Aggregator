@@ -49,3 +49,9 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     ordering_fields = ['id', 'title', 'last_update']
 
 
+class PodcastViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    serializer_class = PodcastSerializer
+    queryset = Podcast.objects.all()
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'pub_Date', 'description', 'explicit']
+    ordering_fields = ['id', 'title', 'pub_Date']
