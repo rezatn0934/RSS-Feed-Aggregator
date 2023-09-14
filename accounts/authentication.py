@@ -82,3 +82,10 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.PermissionDenied('User is inactive')
 
         return user
+
+    @staticmethod
+    def validate_refresh_token(payload):
+        jti = payload.get('jti')
+        if jti not in cache:
+            raise exceptions.PermissionDenied(
+                'Invalid refresh token, please login again.')
