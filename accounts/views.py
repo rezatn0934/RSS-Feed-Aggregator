@@ -48,3 +48,25 @@ class UserLogin(APIView):
             "refresh": refresh_token,
         }
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class RefreshToken(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        payload = request.auth
+        user = JWTAuthentication.get_user_from_payload(payload)
+        jti = payload["jti"]
+        cache.delete(jti)
+
+        jti = jti_maker(request, user.id)
+        access_token = generate_access_token(user.id, jti)
+        refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_AUTH_TTL)
+        cache.set(jti, 0, timeout=settings.REDIS_AUTH_TTL, version=None)
+
+        data = {
+            "access": access_token,
+            "refresh": refresh_token
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
+
