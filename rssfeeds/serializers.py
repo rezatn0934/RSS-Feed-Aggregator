@@ -31,3 +31,12 @@ class PodcastSerializer(serializers.ModelSerializer):
             'id': {'read_only': True}
         }
 
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'channel', 'guid', 'pub_date', 'image',
+                  'source', 'link']
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
