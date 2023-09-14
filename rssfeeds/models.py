@@ -22,20 +22,7 @@ class Channel(models.Model):
     owner = models.CharField(max_length=100)
 
 
-class Podcast(models.Model):
-    title = models.CharField(max_length=250)
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
-    subtitle = models.TextField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    guid = models.CharField(max_length=150)
-    pub_date = models.DateTimeField(null=True, blank=True)
-    duration = models.CharField(null=True, blank=True)
-    audio_file = models.URLField(max_length=500)
-    image = models.URLField(max_length=500, null=True, blank=True)
-    explicit = models.BooleanField(null=True, blank=True)
-
-
-class News(models.Model):
+class AbstractRssItem(models.Model):
     title = models.CharField(max_length=250)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
     link = models.URLField(max_length=500)
@@ -43,3 +30,16 @@ class News(models.Model):
     guid = models.CharField(max_length=150)
     pub_date = models.DateTimeField(null=True, blank=True)
     image = models.URLField(max_length=500, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
+class Podcast(AbstractRssItem):
+    duration = models.CharField(null=True, blank=True)
+    audio_file = models.URLField(max_length=500)
+    explicit = models.BooleanField(null=True, blank=True)
+
+
+class News(AbstractRssItem):
+   pass
