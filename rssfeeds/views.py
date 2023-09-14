@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
@@ -28,6 +29,7 @@ class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, Retrie
     serializer_class = XmlLinkSerializer
     queryset = XmlLink.objects.all()
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -76,7 +78,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     ordering_fields = ['id', 'title', 'last_update']
 
 
-class PodcastViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving Podcasts.
 
@@ -98,7 +100,7 @@ class PodcastViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     ordering_fields = ['id', 'title', 'pub_Date']
 
 
-class NewsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class NewsViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving News items.
 
