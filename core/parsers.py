@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from abc import ABC, abstractmethod
-from category_node import CategoryNode
+from .category_node import CategoryNode
 
 import requests
 
@@ -52,16 +52,6 @@ class Parser(ABC):
         """
         pass
 
-    @abstractmethod
-    def parse_xml_and_create_records(self):
-        """
-        Abstract method to parse the entire XML and create records.
-
-        Returns:
-            dict: Parsed data from the channel and items.
-        """
-        pass
-
     def get_categories(self, element, parent=None, parent_list=None):
         """
         Get a hierarchical structure of <itunes:category> elements within an element.
@@ -69,11 +59,10 @@ class Parser(ABC):
         Args:
             element (Element): The parent element.
             parent (Category or None): The parent category.
-            :param element:
-            :param parent:
-            :param parent_list:
+            parent_list (list, optional): A list to store the hierarchical categories.
+
         Returns:
-            Category: A hierarchical structure of categories.
+            list: A hierarchical structure of categories.
         """
         if parent_list is None:
             parent_list = []
@@ -88,18 +77,21 @@ class Parser(ABC):
 
         return parent_list
 
-    def get_element_text(self, element, tag):
+    def get_element_text(self, element, tag, namespaces=None):
         """
         Get the text content of a sub-element within an element.
 
         Args:
             element (Element): The parent element.
             tag (str): The tag name of the sub-element.
+            namespaces (dict, optional): Namespace dictionary for the sub-element.
 
         Returns:
             str: The text content of the sub-element, or an empty string if not found.
         """
-        sub_element = element.find(tag, namespaces=self.itunes_namespace)
+        if not namespaces:
+            namespaces = self.itunes_namespace
+        sub_element = element.find(tag, namespaces=namespaces)
         return sub_element.text if sub_element is not None else ''
 
     @staticmethod
@@ -129,7 +121,11 @@ class Parser(ABC):
             datetime: A datetime object representing the parsed date, or None if date_str is empty.
         """
         if date_str:
-            return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
+            try:
+                return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
+            except:
+                pub_dat = date_str.replace("T", " ").replace("Z", "")
+                return datetime.strptime(pub_dat, "%Y-%m-%d %H:%M:%S")
         return None
 
     def parse_channel(self):
@@ -146,22 +142,39 @@ class Parser(ABC):
         language = self.get_element_text(self.channel_data, 'language')
         subtitle = self.get_element_text(self.channel_data, 'itunes:subtitle')
         image = self.get_element_attr(self.channel_data, 'itunes:image', 'href')
+        if not image:
+            image = self.get_element_text(self.channel_data, 'image/url')
         author = self.get_element_text(self.channel_data, 'itunes:author')
-        source = self.get_element_text(self.channel_data, 'link')
         owner = self.get_element_text(self.channel_data, 'itunes:owner/itunes:name')
         categories = self.get_categories(self.channel_data)
         return {
-            'title': title,
-            'description': description,
-            'pub_date': pub_date,
-            'language': language,
-            'subtitle': subtitle,
-            'image': image,
-            'author': author,
-            'source': source,
-            'owner': owner,
-            'category': categories
+            'data':
+                {'title': title,
+                 'description': description,
+                 'last_update': pub_date,
+                 'language': language,
+                 'subtitle': subtitle,
+                 'image': image,
+                 'author': author,
+                 'owner': owner, },
+            'categories': categories
         }
+
+    def parse_xml_and_create_records(self):
+        """
+        Parse the entire XML and create records for podcasts.
+
+        Returns:
+            dict: Parsed data including channel data and a list of podcast items.
+        """
+        channel_data = self.parse_channel()
+        items = list()
+        for item in self.channel_data.findall('item'):
+            item_data = self.item_parser(item)
+            if item_data:
+                items.append(item_data)
+
+        return {'channel_data': channel_data, 'podcast_data': items}
 
 
 class PodcastParser(Parser):
@@ -194,29 +207,57 @@ class PodcastParser(Parser):
         image = self.get_element_attr(item, 'itunes:image', 'href')
         explicit = True if (self.get_element_text(item, 'itunes:explicit')).lower() in ('yes' or 'true') else False
 
-        return {
-            'title': title,
-            'subtitle': subtitle,
-            'description': description,
-            'guid': guid,
-            'pub_date': pub_date,
-            'duration': duration,
-            'audio_file': audio_file,
-            'image': image,
-            'explicit': explicit
-        }
+        if audio_file or title or guid:
+            return {
+                'title': title,
+                'subtitle': subtitle,
+                'description': description,
+                'guid': guid,
+                'pub_date': pub_date,
+                'duration': duration,
+                'audio_file': audio_file,
+                'image': image,
+                'explicit': explicit
+            }
+        else:
+            return None
 
-    def parse_xml_and_create_records(self):
+
+class NewsParser(Parser):
+    """
+    Parser for News XML data.
+
+    Methods:
+        item_parser(item): Parse an individual News item.
+        parse_xml_and_create_records(): Parse the entire XML and create records for News.
+    """
+
+    def item_parser(self, item):
         """
-        Parse the entire XML and create records for podcasts.
+        Parse an individual News item.
+
+        Args:
+            item (Element): The XML element representing a News item.
 
         Returns:
-            dict: Parsed data including channel data and a list of podcast items.
+            dict: Parsed data from the News item.
         """
-        channel_data = self.parse_channel()
-        items = list()
-        for item in self.channel_data.findall('item'):
-            item_data = self.item_parser(item)
-            items.append(item_data)
+        title = self.get_element_text(item, 'title')
+        link = self.get_element_text(item, 'link')
+        guid = self.get_element_text(item, 'guid')
+        pub_date_str = self.get_element_text(item, 'pubDate')
+        pub_date = self.parse_date(pub_date_str)
+        source = self.get_element_attr(item, 'source', 'url')
+        image = self.get_element_text(item, 'media:content', namespaces=self.media_namespace)
 
-        return {'channel_data': channel_data, 'podcast_data': items}
+        if guid:
+            return {
+                'title': title,
+                'link': link,
+                'guid': guid,
+                'pub_date': pub_date,
+                'image': image,
+                'source': source
+            }
+        else:
+            return None
