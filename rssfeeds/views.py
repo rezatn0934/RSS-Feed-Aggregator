@@ -55,3 +55,11 @@ class PodcastViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'pub_Date', 'description', 'explicit']
     ordering_fields = ['id', 'title', 'pub_Date']
+
+
+class NewsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    serializer_class = NewsSerializer
+    queryset = News.objects.all()
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'pub_Date']
+    ordering_fields = ['id', 'title', 'pub_Date']
