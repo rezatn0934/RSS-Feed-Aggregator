@@ -154,3 +154,28 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'RSS Feed Aggregator API',
     'VERSION': '1.0.0',
 }
+JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": "MY_SIGNING_KEY_123",
+}
+
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+REDIS_CACHE_TTL = 60 * 15
+
+# CACHES = {
+#     # "auth": {
+#     #     "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#     #     "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/2",
+#     #     "TIMEOUT": REDIS_CACHE_TTL,
+#     # },
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
+#         "TIMEOUT": REDIS_CACHE_TTL,
+#     }
+# }
+
+AUTH_USER_MODEL = 'accounts.User'
