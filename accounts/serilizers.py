@@ -27,3 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser',
                   'date_joined', 'last_modify']
+
+
+class UserLoginSerializer(serializers.Serializer):
+    user_identifier = serializers.CharField()
+    password = serializers.CharField()
