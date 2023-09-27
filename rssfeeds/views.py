@@ -1,13 +1,15 @@
-from django.db import transaction
+from time import sleep
+# from django.db.models import RelatedField.get_reverse_related_filter
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rssfeeds.serializers import XmlLinkSerializer, ChannelSerializer, PodcastSerializer, NewsSerializer
+from .serializers import XmlLinkSerializer, ChannelSerializer, PodcastSerializer, NewsSerializer
 from .models import Channel, XmlLink, Podcast, News
-from .utils import parse_podcast_data, create_or_update_categories
-
+from .tasks import xml_link_creation, update_rssfeeds
+from interactions.models import Comment, Like, Subscription, BookMark
 
 class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """
@@ -76,6 +78,29 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'last_update', 'description', 'author']
     ordering_fields = ['id', 'title', 'last_update']
+
+    def retrieve(self, request, *args, **kwargs):
+        channel = self.get_object()
+        items = None
+
+        if hasattr(channel, 'podcast_set'):
+            items = channel.podcast_set.all()
+            items_serializer = PodcastSerializer(items, many=True)
+        elif hasattr(channel, 'news_set'):
+            items = channel.news_set.all()
+            items_serializer = NewsSerializer(items, many=True)
+
+        if items:
+            data = {
+                'channel': self.get_serializer(channel).data,
+                'items': items_serializer.data
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'detail': 'channel has no item'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
