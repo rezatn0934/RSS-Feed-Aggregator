@@ -188,6 +188,36 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+
+    "handlers": {
+
+        "handlers": {
+            "file": {
+                "level": "INFO",
+                "class": "logging.FileHandler",
+                "filename": BASE_DIR / "log.log",
+                "formatter": "verbose",
+            },
+        },
+    },
+    "loggers": {
+        "celery-logger": {
+            "handlers": ["file"],
+            "level": "INFO",
+            'propagate': False
+        },
+
+    },
+}
 
 
 AUTH_USER_MODEL = 'accounts.User'
