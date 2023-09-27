@@ -16,6 +16,8 @@ class XmlLinkSerializer(serializers.ModelSerializer):
 
 
 class ChannelSerializer(serializers.ModelSerializer):
+    subscribed = serializers.SerializerMethodField()
+
     class Meta:
         model = Channel
         fields = ['id', 'title', 'description', 'last_update', 'language', 'subtitle',
@@ -24,6 +26,12 @@ class ChannelSerializer(serializers.ModelSerializer):
             'id': {'read_only': True}
         }
 
+    def get_subscribed(self, obj):
+        user = self.context['request'].user
+        return Like.objects.filter(
+            id=obj.pk,
+            user=user
+        ).exists()
 
 class BaseItemSerializer(serializers.ModelSerializer):
     liked = serializers.SerializerMethodField()
