@@ -86,6 +86,27 @@ class UserLogin(ViewSet):
         }
         return Response(data, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['post'])
+    def forget_password(self, request):
+        serializer = ResetPasswordEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.svalidated_data.get('email')
+        user = User.objects.filter(email=email)
+        if user.exists():
+            new_pass = get_random_string(6)
+            user.set_password(new_pass)
+            user.save()
+            custom_sen_mail(subject='reset password', message=f'your new password is {new_pass}', receiver=user.email)
+            return {
+                'email': email,
+                'message': 'Password reset email sent successfully'
+            }
+        else:
+            return {
+                'email': email,
+                'message': 'User with this email does not exist'
+            }
 
 class RefreshToken(APIView):
     """
