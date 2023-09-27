@@ -39,6 +39,7 @@ class AbstractBase(models.Model):
     image = models.URLField(max_length=500, null=True, blank=True)
     comment = GenericRelation('interactions.comment')
     like = GenericRelation('interactions.like')
+    bookmark = GenericRelation('interactions.bookmark')
 
     class Meta:
         abstract = True
