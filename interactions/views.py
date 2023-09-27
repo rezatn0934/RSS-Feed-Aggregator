@@ -31,3 +31,6 @@ class BookMarkView(InteractionMixin, APIView):
 
     def post(self, request):
         return self.create_object(request, BookMark)
+
+    def delete(self, request):
+        return self.delete_object(request, BookMark)
