@@ -19,6 +19,16 @@ class MyRequest(Request):
                 f'A hard timeout was enforced for task task {self.task.name}'
             )
 
+    def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
+        super().on_failure(
+            exc_info,
+            send_failed_event=send_failed_event,
+            return_ok=return_ok
+        )
+        logger.error(
+            f'Failure detected for task {self.task.name}'
+        )
+
 @shared_task(bind=True, task_time_limit=60, acks_late=True)
 def xml_link_creation(self, xml_link):
     xml_link = XmlLink.objects.get(xml_link=xml_link)
