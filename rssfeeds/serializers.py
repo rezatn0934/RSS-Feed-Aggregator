@@ -1,5 +1,8 @@
+
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
+from interactions.models import Like, BookMark
 from .models import XmlLink, Channel, Podcast, News
 
 
@@ -20,6 +23,16 @@ class ChannelSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True}
         }
+
+
+class BaseItemSerializer(serializers.ModelSerializer):
+    liked = serializers.SerializerMethodField()
+    bookmarked = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ['id', 'title', 'channel', 'liked', 'bookmarked', 'guid', 'pub_date', 'image']
+
+
 
 
 class PodcastSerializer(serializers.ModelSerializer):
