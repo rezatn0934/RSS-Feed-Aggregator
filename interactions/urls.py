@@ -7,4 +7,5 @@ urlpatterns = [
     path('like/', LikeView.as_view(), name='like'),
     path('comment/', CommentView.as_view(), name='comment'),
     path('bookmark/', BookMarkView.as_view(), name='bookmark'),
+    path('subscription/', SubscriptionView.as_view(), name='subscription'),
 ]
