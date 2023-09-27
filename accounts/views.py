@@ -159,3 +159,15 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     permission_classes = (IsAuthenticated, UserIsOwner)
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+    @action(detail=True, methods=['post'])
+    def change_password(self, request, pk=None):
+        user = self.get_object()
+        serializer = PasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            user.set_password(serializer.validated_data['password'])
+            user.save()
+            return Response({'status': 'password successfully changed'})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
