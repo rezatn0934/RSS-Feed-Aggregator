@@ -42,3 +42,9 @@ def create_or_update_channel(xml_link, channel_data):
         else:
             status = 'exist'
     return channel, status
+
+
+def create_items(model, channel, podcast_data):
+    podcast_items = (model(channel=channel, **item) for item in podcast_data if
+                     not model.objects.filter(guid=item.get("guid")).exists())
+    model.objects.bulk_create(podcast_items)
