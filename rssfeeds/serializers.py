@@ -41,7 +41,11 @@ class BaseItemSerializer(serializers.ModelSerializer):
             user=user
         ).exists()
 
-
+    def get_bookmarked(self, obj):
+        user = self.context['request'].user
+        content_type = ContentType.objects.get_for_model(obj)
+        return BookMark.objects.filter(
+            object_id=obj.pk, content_type=content_type, user=user).exists()
 
 
 class PodcastSerializer(serializers.ModelSerializer):
