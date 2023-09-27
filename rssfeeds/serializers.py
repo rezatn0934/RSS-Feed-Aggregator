@@ -54,11 +54,7 @@ class PodcastSerializer(BaseItemSerializer):
         fields = BaseItemSerializer.Meta.fields + ['subtitle', 'description', 'audio_file', 'explicit']
 
 
-class NewsSerializer(serializers.ModelSerializer):
-    class Meta:
+class NewsSerializer(BaseItemSerializer):
+    class Meta(BaseItemSerializer.Meta):
         model = News
-        fields = ['id', 'title', 'channel', 'guid', 'pub_date', 'image',
-                  'source', 'link']
-        extra_kwargs = {
-            'id': {'read_only': True}
-        }
+        fields = BaseItemSerializer.Meta.fields + ['source', 'link']
