@@ -103,7 +103,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
             )
 
 
-class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
+class PodcastViewSet(CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving Podcasts.
 
@@ -125,7 +125,8 @@ class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, Retrie
     ordering_fields = ['id', 'title', 'pub_Date']
 
 
-class NewsViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
+
+class NewsViewSet(CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving News items.
 
