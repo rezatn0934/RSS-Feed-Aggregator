@@ -152,3 +152,10 @@ class LogoutView(APIView):
             return Response({"message": "Successful Logout"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated, UserIsOwner)
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
