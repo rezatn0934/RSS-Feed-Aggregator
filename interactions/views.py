@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from .mixins import InteractionMixin
-from .models import Like, Comment
+from .models import Like, Comment, BookMark
 
 
 class LikeView(InteractionMixin, APIView):
@@ -24,3 +24,10 @@ class CommentView(InteractionMixin, APIView):
 
     def delete(self, request):
         return self.delete_object(request, Comment)
+
+
+class BookMarkView(InteractionMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        return self.create_object(request, BookMark)
