@@ -29,6 +29,10 @@ class MyRequest(Request):
             f'Failure detected for task {self.task.name}'
         )
 
+    def on_success(self, failed__retval__runtime, **kwargs):
+        logger.info(f"successful parse for task {self.task.name}")
+
+
 @shared_task(bind=True, task_time_limit=60, acks_late=True)
 def xml_link_creation(self, xml_link):
     xml_link = XmlLink.objects.get(xml_link=xml_link)
