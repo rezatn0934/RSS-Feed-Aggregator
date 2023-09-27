@@ -180,6 +180,14 @@ CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
 CELERY_TIME_ZONE = 'UTC'
 
+CELERY_BEAT_SCHEDULE = {
+    'update_rssfeeds': {
+        'task': 'rssfeeds.tasks.update_rssfeeds',
+        'schedule': crontab(minute=0, hour=0),
+        'kwargs': {'xml_link': 'sdfssffg'}
+    }
+}
+
 
 
 AUTH_USER_MODEL = 'accounts.User'
