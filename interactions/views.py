@@ -1,8 +1,13 @@
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.generics import GenericAPIView
 
 from .mixins import InteractionMixin
-from .models import Like, Comment, BookMark
+from .models import Like, Comment, BookMark, Subscription
+from .utils import update_recommendations
+from .serializers import SubscriptionSerializer
 
 
 class LikeView(InteractionMixin, APIView):
@@ -34,3 +39,9 @@ class BookMarkView(InteractionMixin, APIView):
 
     def delete(self, request):
         return self.delete_object(request, BookMark)
+
+
+class SubscriptionView(GenericAPIView):
+    serializer_class = SubscriptionSerializer
+    queryset = Subscription.objrcts.all
+
