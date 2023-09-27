@@ -24,6 +24,9 @@ class Channel(models.Model):
     category = models.ManyToManyField(Category, blank=True)
     owner = models.CharField(max_length=100)
 
+    def subscriptions_list(self):
+        return self.subscriptions.all()
+
     def __str__(self):
         return self.title
 
