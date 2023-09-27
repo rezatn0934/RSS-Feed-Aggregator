@@ -83,3 +83,7 @@ services:
     volumes:
       - flower_data:/flower_data
 
+
+networks:
+  main:
+
