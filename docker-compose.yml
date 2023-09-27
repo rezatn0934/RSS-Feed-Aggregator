@@ -14,3 +14,17 @@ services:
     restart: always
     volumes:
       - postgres_data_rss:/var/lib/postgresql/data
+
+  app:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    container_name: app
+    volumes:
+      - .:/code/
+    depends_on:
+      - postgres
+    ports:
+      - 8000:8000
+    networks:
+      - main
+    restart: always
