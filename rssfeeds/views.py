@@ -11,7 +11,6 @@ from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 from interactions.models import Comment, Like, Subscription, BookMark
 
-
 class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for managing XmlLinks, Channels, and Podcasts.
@@ -39,6 +38,14 @@ class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, Retrie
         xml_link = serializer.save()
         xml_link_creation.delay(xml_link.xml_link)
         return Response('Your request is processing', status=status.HTTP_201_CREATED)
+
+
+class UpdateRSSFeedsView(APIView):
+
+    def get(self, request):
+        update_rssfeeds.delay()
+
+        return Response('RSS Feeds have been updated', status=status.HTTP_200_OK)
 
 
 class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
