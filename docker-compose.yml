@@ -66,3 +66,20 @@ services:
     networks:
       - main
     restart: always
+
+  flower:
+    image: mher/flower:latest
+    container_name: flower
+    build: .
+    command: celery -A config flower
+    networks:
+      - main
+    ports:
+      - 5555:5555
+    depends_on:
+      - app
+      - redis
+      - celery
+    volumes:
+      - flower_data:/flower_data
+
