@@ -1,15 +1,20 @@
 import jwt
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import caches
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet, ViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
-from .utils import generate_access_token, generate_refresh_token, jti_maker
-from .serilizers import UserRegisterSerializer, UserLoginSerializer
-
+from .utils import generate_access_token, generate_refresh_token, jti_maker, get_random_string, custom_sen_mail
+from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
+    ResetPasswordEmailSerializer
+from .models import User
+from .permisions import UserIsOwner
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
 
@@ -40,7 +45,7 @@ class UserRegister(APIView):
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserLogin(APIView):
+class UserLogin(ViewSet):
     """
     Log in an existing user and issue access and refresh tokens.
 
@@ -69,11 +74,11 @@ class UserLogin(APIView):
         if user is None:
             return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-        jti = jti_maker(request, user.id)
+        jti = jti_maker(request)
         access_token = generate_access_token(user.id, jti)
         refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_CACHE_TTL)
 
-        cache.set(jti, 0)
+        caches['auth'].set(jti, user.id)
 
         data = {
             "access": access_token,
@@ -105,12 +110,12 @@ class RefreshToken(APIView):
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
         user = JWTAuthentication.get_user_from_payload(payload)
         jti = payload["jti"]
-        cache.delete(jti)
+        caches['auth'].delete(jti)
 
-        jti = jti_maker(request, user.id)
+        jti = jti_maker(request)
         access_token = generate_access_token(user.id, jti)
         refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_CACHE_TTL)
-        cache.set(jti, 0, timeout=settings.REDIS_CACHE_TTL, version=None)
+        caches['auth'].set(jti, user.id, timeout=settings.REDIS_CACHE_TTL, version=None)
 
         data = {
             "access": access_token,
@@ -142,7 +147,7 @@ class LogoutView(APIView):
         try:
             payload = request.auth
             jti = payload["jti"]
-            cache.delete(jti)
+            caches['auth'].delete(jti)
 
             return Response({"message": "Successful Logout"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
