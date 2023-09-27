@@ -56,3 +56,12 @@ class SubscriptionView(GenericAPIView):
 
         update_recommendations(user=user, categories=categories, increment_count=1)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        subscription = self.get_object()
+        channel = subscription.channel
+        user = request.user
+        categories = channel.categories.all()
+
+        update_recommendations(user=user, categories=categories, increment_count=-1)
+        return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
