@@ -44,3 +44,10 @@ def decode_jwt(token):
     payload = jwt.decode(
         token, settings.SECRET_KEY, algorithms=['HS256'])
     return payload
+
+
+def get_random_string(length):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+
+
