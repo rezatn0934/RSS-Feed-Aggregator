@@ -11,6 +11,7 @@ from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 from interactions.models import Comment, Like, Subscription, BookMark
 
+
 class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for managing XmlLinks, Channels, and Podcasts.
@@ -31,31 +32,13 @@ class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, Retrie
     serializer_class = XmlLinkSerializer
     queryset = XmlLink.objects.all()
 
-    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         xml_link = serializer.save()
-
-        [data, model] = parse_podcast_data(xml_link)
-
-        categories = create_or_update_categories(data.get('channel_data')['categories'])
-
-        channel_data = data.get('channel_data')['data']
-        channel, created = Channel.objects.get_or_create(xml_link=xml_link, defaults=channel_data)
-        if not created:
-            for key, value in channel_data.items():
-                setattr(channel, key, value)
-            channel.save()
-
-        channel.category.set(categories)
-
-        podcast_data = data.get('podcast_data')
-        podcast_items = [model(channel=channel, **item) for item in podcast_data]
-        model.objects.bulk_create(podcast_items)
-
-        return Response('ok', status=status.HTTP_201_CREATED)
+        xml_link_creation.delay(xml_link.xml_link)
+        return Response('Your request is processing', status=status.HTTP_201_CREATED)
 
 
 class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
