@@ -33,7 +33,16 @@ class MyRequest(Request):
         logger.info(f"successful parse for task {self.task.name}")
 
 
-@shared_task(bind=True, task_time_limit=60, acks_late=True)
+class MyTask(Task):
+    Request = MyRequest
+    autoretry_for = (Exception,)
+    retry_kwargs = {'max_retries': 5}
+    retry_backoff = True
+    retry_jitter = False
+    task_acks_late = True
+
+
+@shared_task(base=MyTask, bind=True, task_time_limit=60, acks_late=True)
 def xml_link_creation(self, xml_link):
     xml_link = XmlLink.objects.get(xml_link=xml_link)
 
