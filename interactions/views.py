@@ -25,3 +25,22 @@ class LikeView(APIView):
         if not created:
             return Response({'message': "You're already like it."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': "You liked the item successfully."}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+
+        channel_id = request.data.get('channel_id')
+
+        channel = Channel.objects.get(id=channel_id)
+        item_id = request.data.get('pk')
+
+        if hasattr(channel, 'podcast_set'):
+            item = Podcast.objects.get(id=item_id)
+        elif hasattr(channel, 'news_set'):
+            item = News.objects.get(id=item_id)
+
+        try:
+            like = Like.objects.get(user=request.user, content_object=item)
+            like.delete()
+            return Response({'message': "You unliked the item successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except Like.DoesNotExist:
+            return Response({'message': "You haven't liked this item."}, status=status.HTTP_400_BAD_REQUEST)
