@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
@@ -9,4 +9,7 @@ router.register('podcasts', views.PodcastViewSet)
 router.register('news', views.NewsViewSet)
 
 app_name = 'rssfeeds'
-urlpatterns = router.urls
+urlpatterns = [
+    path('update_rssfeeds/', views.UpdateRSSFeedsView.as_view(), name='update_rssfeeds'),
+    path('', include(router.urls)),
+]
