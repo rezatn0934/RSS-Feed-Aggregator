@@ -38,6 +38,7 @@ class AbstractBase(models.Model):
     pub_date = models.DateTimeField(null=True, blank=True)
     image = models.URLField(max_length=500, null=True, blank=True)
     comment = GenericRelation('interactions.comment')
+    like = GenericRelation('interactions.like')
 
     class Meta:
         abstract = True
