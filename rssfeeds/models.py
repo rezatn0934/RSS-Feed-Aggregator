@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.contenttypes.fields import GenericRelation
 # Create your models here.
 from core.models import Type, Category
 
@@ -28,7 +28,7 @@ class Channel(models.Model):
         return self.title
 
 
-class AbstractRssItem(models.Model):
+class AbstractBase(models.Model):
     title = models.CharField(max_length=250)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
     guid = models.CharField(max_length=150)
@@ -42,7 +42,7 @@ class AbstractRssItem(models.Model):
         return self.title
 
 
-class Podcast(AbstractRssItem):
+class Podcast(AbstractBase):
     subtitle = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     duration = models.CharField(null=True, blank=True)
@@ -50,6 +50,6 @@ class Podcast(AbstractRssItem):
     explicit = models.BooleanField(null=True, blank=True)
 
 
-class News(AbstractRssItem):
+class News(AbstractBase):
     source = models.URLField(max_length=500, null=True, blank=True)
     link = models.URLField(max_length=500)
