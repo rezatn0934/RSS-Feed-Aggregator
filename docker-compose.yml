@@ -28,3 +28,14 @@ services:
     networks:
       - main
     restart: always
+
+  redis:
+    container_name: redis
+    image: redis:7.2-alpine
+    networks:
+      - main
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - redis_data_rss:/data
