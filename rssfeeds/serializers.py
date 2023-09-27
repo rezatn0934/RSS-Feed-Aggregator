@@ -48,14 +48,10 @@ class BaseItemSerializer(serializers.ModelSerializer):
             object_id=obj.pk, content_type=content_type, user=user).exists()
 
 
-class PodcastSerializer(serializers.ModelSerializer):
-    class Meta:
+class PodcastSerializer(BaseItemSerializer):
+    class Meta(BaseItemSerializer.Meta):
         model = Podcast
-        fields = ['id', 'title', 'channel', 'guid', 'pub_date', 'image',
-                  'subtitle', 'description', 'audio_file', 'explicit']
-        extra_kwargs = {
-            'id': {'read_only': True}
-        }
+        fields = BaseItemSerializer.Meta.fields + ['subtitle', 'description', 'audio_file', 'explicit']
 
 
 class NewsSerializer(serializers.ModelSerializer):
