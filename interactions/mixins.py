@@ -23,3 +23,22 @@ class InteractionMixin:
         categories = channel.categories.all()
         update_recommendations(user=request.user, categories=categories, increment_count=1)
         return Response({'message': f"Your object has been created successfully ."}, status=status.HTTP_200_OK)
+
+    def delete_object(self, request, model):
+        channel_id = request.data.get('channel_id')
+        channel = Channel.objects.filter(id=channel_id)
+        pk = request.data.get('pk')
+
+        item_model = get_item_model(channel)
+        item = item_model.objects.get(id=pk)
+
+        try:
+            interaction = model.objects.get(user=request.user, content_object=item)
+            interaction.delete()
+            categories = channel.categories.all()
+            update_recommendations(user=request.user, categories=categories, increment_count=-1)
+            return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
+        except model.DoesNotExist:
+            return Response({'message': "You haven't interacted with this item."}, status=status.HTTP_400_BAD_REQUEST)
+
+
