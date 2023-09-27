@@ -21,3 +21,6 @@ class CommentView(InteractionMixin, APIView):
     def post(self, request):
         content = request.data.get('content')
         return self.create_object(request, Comment, content=content)
+
+    def delete(self, request):
+        return self.delete_object(request, Comment)
