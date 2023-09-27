@@ -1,7 +1,12 @@
 import datetime
+import random
+import string
+
 import jwt
 from django.conf import settings
 from uuid import uuid4
+
+from django.core.mail import send_mail
 
 
 def generate_access_token(user_id, jti):
@@ -32,7 +37,7 @@ def generate_refresh_token(user_id, jti, ttl):
 
 
 def jti_maker(request, user_id):
-    return f"{uuid4().hex} || {user_id} || {request.META['HTTP_USER_AGENT']} || {request.META['USERNAME']}"
+    return uuid4().hex
 
 
 def decode_jwt(token):
