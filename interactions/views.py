@@ -45,3 +45,14 @@ class SubscriptionView(GenericAPIView):
     serializer_class = SubscriptionSerializer
     queryset = Subscription.objrcts.all
 
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        channel = serializer.validated_data['channel']
+        user = request.user
+        categories = channel.categories.all()
+
+        update_recommendations(user=user, categories=categories, increment_count=1)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
