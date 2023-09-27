@@ -32,6 +32,15 @@ class BaseItemSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['id', 'title', 'channel', 'liked', 'bookmarked', 'guid', 'pub_date', 'image']
 
+    def get_liked(self, obj):
+        user = self.context['request'].user
+        content_type = ContentType.objects.get_for_model(obj)
+        return Like.objects.filter(
+            object_id=obj.pk,
+            content_type=content_type,
+            user=user
+        ).exists()
+
 
 
 
