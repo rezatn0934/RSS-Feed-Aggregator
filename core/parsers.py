@@ -124,8 +124,11 @@ class Parser(ABC):
             try:
                 return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
             except:
-                pub_dat = date_str.replace("T", " ").replace("Z", "")
-                return datetime.strptime(pub_dat, "%Y-%m-%d %H:%M:%S")
+                try:
+                    pub_dat = date_str.replace("T", " ").replace("Z", "")
+                    return datetime.strptime(pub_dat, "%Y-%m-%d %H:%M:%S")
+                except:
+                    return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %Z')
         return None
 
     def parse_channel(self):
