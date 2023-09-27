@@ -14,3 +14,10 @@ class LikeView(InteractionMixin, APIView):
     def delete(self, request):
         return self.delete_object(request, Like)
 
+
+class CommentView(InteractionMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        content = request.data.get('content')
+        return self.create_object(request, Comment, content=content)
