@@ -51,3 +51,7 @@ def get_random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
+def custom_sen_mail(subject, message, receiver):
+    recipient_list = [receiver, ]
+    from_email = settings.EMAIL_HOST_USER
+    send_mail(subject, message, from_email, recipient_list)
