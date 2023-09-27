@@ -87,3 +87,9 @@ services:
 networks:
   main:
 
+
+volumes:
+  postgres_data_rss:
+  redis_data_rss:
+  rabbitmq_data:
+  flower_data:
