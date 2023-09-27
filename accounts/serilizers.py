@@ -45,3 +45,8 @@ class PasswordSerializer(serializers.Serializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError('Passwords must match!')
         return attrs
+
+
+class ResetPasswordEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
