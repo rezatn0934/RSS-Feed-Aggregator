@@ -39,3 +39,19 @@ services:
     restart: always
     volumes:
       - redis_data_rss:/data
+
+  celery:
+    container_name: celery
+    command: celery -A config worker -l INFO
+    depends_on:
+      - app
+      - redis
+    build: .
+    volumes:
+      - .:/code/
+    environment:
+      - C_FORCE_ROOT="true"
+    networks:
+      - main
+    restart: always
+
