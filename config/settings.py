@@ -162,17 +162,19 @@ REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')
 REDIS_CACHE_TTL = 60 * 15
 
-# CACHES = {
-#     # "auth": {
-#     #     "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#     #     "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/2",
-#     #     "TIMEOUT": REDIS_CACHE_TTL,
-#     # },
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
-#         "TIMEOUT": REDIS_CACHE_TTL,
-#     }
-# }
+CACHES = {
+    "auth": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/2",
+        "TIMEOUT": REDIS_CACHE_TTL,
+    },
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
+        "TIMEOUT": REDIS_CACHE_TTL,
+    },
+}
+
+
 
 AUTH_USER_MODEL = 'accounts.User'
