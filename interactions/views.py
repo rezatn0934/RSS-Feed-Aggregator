@@ -24,13 +24,7 @@ class CommentView(InteractionMixin, APIView):
 
 
 class BookMarkView(InteractionMixin, APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        return self.create_object(request, BookMark)
-
-    def delete(self, request):
-        return self.delete_object(request, BookMark)
+    model = BookMark
 
 
 class SubscriptionView(GenericAPIView):
