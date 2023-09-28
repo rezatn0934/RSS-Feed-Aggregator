@@ -25,8 +25,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser',
-                  'date_joined', 'last_modify']
+        fields = ['username', 'email', 'first_name', 'last_name']
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -36,3 +35,30 @@ class UserLoginSerializer(serializers.Serializer):
 
 class RefreshTokenSerializer(serializers.Serializer):
     token = serializers.CharField(required=True)
+
+
+class PasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    new_pass = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    new_pass2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
+    def validate(self, attrs):
+        if attrs['new_pass'] != attrs['new_pass2']:
+            raise serializers.ValidationError('Passwords must match!')
+        return attrs
+
+
+class ResetPasswordEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class PasswordTokenSerializer(serializers.Serializer):
+
+    token = serializers.CharField(style={"input_type": "token"}, write_only=True)
+    new_pass = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    new_pass2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
+    def validate(self, attrs):
+        if attrs['new_pass'] != attrs['new_pass2']:
+            raise serializers.ValidationError('Passwords must match!')
+        return attrs

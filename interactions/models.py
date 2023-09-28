@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 from rssfeeds.models import Channel
+from core.models import Category
 
 
 class Like(models.Model):
@@ -33,6 +34,9 @@ class Subscription(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='subscriptions')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = [['user', 'channel']]
+
     def __str__(self):
         return f'{self.channel} subscribed by {self.user}'
 
@@ -46,3 +50,15 @@ class BookMark(models.Model):
 
     def __str__(self):
         return f'{self.user} bookmarked {self.content_object}'
+
+
+class Recommendation(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='category_recommendations')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.user.username} interest in: {self.category.name}'
+
+    class Meta:
+        ordering = ['-count']

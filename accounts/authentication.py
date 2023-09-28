@@ -1,6 +1,6 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
+from django.core.cache import cache, caches
 
 from rest_framework import authentication
 from rest_framework import exceptions
@@ -40,12 +40,12 @@ class JWTAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
 
         refresh_token = request.data.get("refresh_token")
-
+        if not refresh_token:
+            return None
         payload = self.get_payload_from_refresh_token(refresh_token)
 
         user = self.get_user_from_payload(payload)
 
-        # if jti not in map(lambda x: x.decode("utf8"), redis_instance.keys("*")):
         self.validate_refresh_token(payload)
 
         authorization_header = self.get_authorization_header(request)
@@ -86,14 +86,14 @@ class JWTAuthentication(authentication.BaseAuthentication):
     @staticmethod
     def validate_refresh_token(payload):
         jti = payload.get('jti')
-        if jti not in cache:
+        if not caches['auth'].keys(jti):
             raise exceptions.PermissionDenied(
                 'Invalid refresh token, please login again.')
 
     def get_authorization_header(self, request):
         authorization_header = request.headers.get(self.authentication_header_name)
         if not authorization_header:
-            raise exceptions.NotFound('Authorization Header was not set')
+            return None
         return authorization_header
 
     def check_prefix(self, authorization_header):

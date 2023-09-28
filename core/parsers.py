@@ -124,8 +124,11 @@ class Parser(ABC):
             try:
                 return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
             except:
-                pub_dat = date_str.replace("T", " ").replace("Z", "")
-                return datetime.strptime(pub_dat, "%Y-%m-%d %H:%M:%S")
+                try:
+                    pub_dat = date_str.replace("T", " ").replace("Z", "")
+                    return datetime.strptime(pub_dat, "%Y-%m-%d %H:%M:%S")
+                except:
+                    return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %Z')
         return None
 
     def parse_channel(self):
@@ -174,7 +177,12 @@ class Parser(ABC):
             if item_data:
                 items.append(item_data)
 
-        return {'channel_data': channel_data, 'podcast_data': items}
+        sorted_items = sorted(items, key=lambda x: x['pub_date'] if x['pub_date'] else datetime.min)
+        print('2'*100)
+        print(sorted_items)
+        print('1'*100)
+        print(items)
+        return {'channel_data': channel_data, 'podcast_data': sorted_items}
 
 
 class PodcastParser(Parser):

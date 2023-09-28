@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import sys
 from datetime import timedelta
 from pathlib import Path
+
+from celery.schedules import crontab
 from dotenv import load_dotenv
 import os
 
@@ -80,25 +82,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
 
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('NAME'),
-            'HOST': os.environ.get('HOST'),
-            'PORT': os.environ.get('PORT'),
-            'USER': os.environ.get('USER'),
-            'PASSWORD': os.environ.get('PASSWORD')
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('NAME'),
+        'HOST': os.environ.get('HOST'),
+        'PORT': os.environ.get('PORT'),
+        'USER': os.environ.get('USER'),
+        'PASSWORD': os.environ.get('PASSWORD')
     }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -164,21 +158,75 @@ JWT = {
     "SIGNING_KEY": "MY_SIGNING_KEY_123",
 }
 
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = os.environ.get('REDIS_PORT')
 REDIS_CACHE_TTL = 60 * 15
 
-# CACHES = {
-#     # "auth": {
-#     #     "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#     #     "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/2",
-#     #     "TIMEOUT": REDIS_CACHE_TTL,
-#     # },
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
-#         "TIMEOUT": REDIS_CACHE_TTL,
-#     }
-# }
+CACHES = {
+    "auth": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/2",
+        "TIMEOUT": REDIS_CACHE_TTL,
+    },
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
+        "TIMEOUT": REDIS_CACHE_TTL,
+    },
+    "pass": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/4",
+        "TIMEOUT": REDIS_CACHE_TTL,
+    },
+}
+
+CELERY_TASK_TRACK_STARTED = True
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
+CELERY_TIME_ZONE = 'UTC'
+
+CELERY_BEAT_SCHEDULE = {
+    'update_rssfeeds': {
+        'task': 'rssfeeds.tasks.update_rssfeeds',
+        'schedule': crontab(minute=0, hour=0),
+    }
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "log.log",
+            "formatter": "verbose",
+        },
+    },
+
+    "loggers": {
+        "celery-logger": {
+            "handlers": ["file"],
+            "level": "INFO",
+            'propagate': False
+        },
+
+    },
+}
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 AUTH_USER_MODEL = 'accounts.User'

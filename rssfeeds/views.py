@@ -1,15 +1,18 @@
-from django.db import transaction
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rssfeeds.serializers import XmlLinkSerializer, ChannelSerializer, PodcastSerializer, NewsSerializer
+
+from .mixins import AuthenticationMixin
+from .serializers import XmlLinkSerializer, ChannelSerializer, PodcastSerializer, NewsSerializer
 from .models import Channel, XmlLink, Podcast, News
-from .utils import parse_podcast_data, create_or_update_categories
+from .tasks import xml_link_creation, update_rssfeeds
 
 
-class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin,
+                     GenericViewSet):
     """
     ViewSet for managing XmlLinks, Channels, and Podcasts.
 
@@ -24,36 +27,31 @@ class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, Retrie
 
     Returns:
         Response: A JSON response indicating success or failure along with appropriate status codes.
+
+
+    Permissions:
+        - POST, DELETE: Admin access required.
+        - GET: AllowAny access for listing News items.
     """
 
     serializer_class = XmlLinkSerializer
     queryset = XmlLink.objects.all()
 
-    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         xml_link = serializer.save()
+        xml_link_creation.delay(xml_link.xml_link)
+        return Response('Your request is processing', status=status.HTTP_201_CREATED)
 
-        [data, model] = parse_podcast_data(xml_link)
 
-        categories = create_or_update_categories(data.get('channel_data')['categories'])
+class UpdateRSSFeedsView(APIView):
 
-        channel_data = data.get('channel_data')['data']
-        channel, created = Channel.objects.get_or_create(xml_link=xml_link, defaults=channel_data)
-        if not created:
-            for key, value in channel_data.items():
-                setattr(channel, key, value)
-            channel.save()
+    def get(self, request):
+        update_rssfeeds.delay()
 
-        channel.category.set(categories)
-
-        podcast_data = data.get('podcast_data')
-        podcast_items = [model(channel=channel, **item) for item in podcast_data]
-        model.objects.bulk_create(podcast_items)
-
-        return Response('ok', status=status.HTTP_201_CREATED)
+        return Response('RSS Feeds have been updated', status=status.HTTP_200_OK)
 
 
 class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -69,6 +67,9 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     Returns:
         Response: A JSON response containing a list of Channels or a single Channel object
         along with appropriate status codes.
+
+    Permissions:
+        - GET: AllowAny access for listing Channels.
     """
 
     serializer_class = ChannelSerializer
@@ -77,8 +78,30 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     search_fields = ['title', 'last_update', 'description', 'author']
     ordering_fields = ['id', 'title', 'last_update']
 
+    def retrieve(self, request, *args, **kwargs):
+        channel = self.get_object()
+        items_serializer = None
+        items = None
+        if hasattr(channel, 'podcast_set') and (len(channel.podcast_set.all()) > 0):
+            items = channel.podcast_set.all()
+            items_serializer = PodcastSerializer(items, many=True)
+        elif hasattr(channel, 'news_set') and (len(channel.news_set.all()) > 0):
+            items = channel.news_set.all()
+            items_serializer = NewsSerializer(items, many=True)
+        if items:
+            data = {
+                'channel': self.get_serializer(channel).data,
+                'items': items_serializer.data
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'detail': 'channel has no item'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
+
+class PodcastViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving Podcasts.
 
@@ -91,6 +114,10 @@ class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, Retrie
     Returns:
         Response: A JSON response containing a list of Podcasts or a single Podcast object
         along with appropriate status codes.
+
+    Permissions:
+        - POST, DELETE: Admin access required.
+        - GET: AllowAny access for listing News items.
     """
 
     serializer_class = PodcastSerializer
@@ -100,7 +127,7 @@ class PodcastViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, Retrie
     ordering_fields = ['id', 'title', 'pub_Date']
 
 
-class NewsViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
+class NewsViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving News items.
 
@@ -113,6 +140,10 @@ class NewsViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveM
     Returns:
         Response: A JSON response containing a list of News items or a single News item
         along with appropriate status codes.
+
+    Permissions:
+        - POST, DELETE: Admin access required.
+        - GET: AllowAny access for listing News items.
     """
 
     serializer_class = NewsSerializer
