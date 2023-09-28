@@ -62,6 +62,9 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     Returns:
         Response: A JSON response containing a list of Channels or a single Channel object
         along with appropriate status codes.
+
+    Permissions:
+    - GET: AllowAny access for listing Channels.
     """
 
     serializer_class = ChannelSerializer
@@ -72,6 +75,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         channel = self.get_object()
+        items_serializer = None
         items = None
         if hasattr(channel, 'podcast_set') and (len(channel.podcast_set.all()) > 0):
             items = channel.podcast_set.all()
