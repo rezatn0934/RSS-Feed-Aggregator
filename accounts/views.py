@@ -7,7 +7,7 @@ from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateM
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
 from .utils import generate_access_token, generate_refresh_token, jti_maker, get_random_string, custom_sen_mail
@@ -84,8 +84,8 @@ class UserLogin(APIView):
             return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
         jti = jti_maker(request)
-        access_token = generate_access_token(user.id, jti)
-        refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_CACHE_TTL)
+        access_token = generate_access_token(user.id, jti, access_token_lifetime)
+        refresh_token = generate_refresh_token(user.id, jti, refresh_token_lifetime)
 
         caches['auth'].set(jti, user.id)
 
@@ -122,9 +122,9 @@ class RefreshToken(APIView):
         caches['auth'].delete(jti)
 
         jti = jti_maker(request)
-        access_token = generate_access_token(user.id, jti)
-        refresh_token = generate_refresh_token(user.id, jti, settings.REDIS_CACHE_TTL)
-        caches['auth'].set(jti, user.id, timeout=settings.REDIS_CACHE_TTL, version=None)
+        access_token = generate_access_token(user.id, jti, access_token_lifetime)
+        refresh_token = generate_refresh_token(user.id, jti, refresh_token_lifetime)
+        caches['auth'].set(jti, user.id)
 
         data = {
             "access": access_token,
