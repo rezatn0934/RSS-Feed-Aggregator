@@ -221,4 +221,6 @@ class ChangePasswordWithToken(APIView):
                 user.save()
                 return Response({'status': 'password successfully changed'})
 
-        return Response({'error': 'Your old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "User  doesn't exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'error': 'Your Token is wrong'}, status=status.HTTP_400_BAD_REQUEST)
