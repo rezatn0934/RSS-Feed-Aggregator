@@ -191,18 +191,13 @@ class ForgetPassword(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.svalidated_data.get('email')
+        email = serializer.validated_data.get('email')
         user = User.objects.filter(email=email)
         if user.exists():
-            new_pass = get_random_string(6)
-            caches['pass'].set(email, new_pass)
-            custom_sen_mail(subject='reset password', message=f'your new password is {new_pass}', receiver=user.email)
-            return {
-                'email': email,
-                'message': 'Password reset email sent successfully'
-            }
+            token = get_random_string(6)
+            caches['pass'].set(token, email)
+            custom_sen_mail(subject='reset password', message=f'This is your {token}. Use it to change your password',
+                            receiver=user.email)
+            return Response({'message': 'Password reset email sent successfully'}, status=status.HTTP_201_CREATED)
         else:
-            return {
-                'email': email,
-                'message': 'User with this email does not exist'
-            }
+            return Response({'message': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
