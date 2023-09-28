@@ -12,6 +12,7 @@ urlpatterns = [
     path("login/", views.UserLogin.as_view(), name="login"),
     path("refresh/", views.RefreshToken.as_view(), name="refresh_token"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
+    path("forget_password/", views.ForgetPassword.as_view(), name="forget_password"),
 ]
 
 urlpatterns += router.urls
