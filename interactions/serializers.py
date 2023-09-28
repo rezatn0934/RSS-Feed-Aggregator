@@ -6,7 +6,10 @@ from .models import Subscription, Comment
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
-        fields = ['channel']
+        fields = ['id', 'channel']
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
 
     def create(self, validated_data):
         channel = validated_data['channel']
