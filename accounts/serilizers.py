@@ -38,8 +38,9 @@ class RefreshTokenSerializer(serializers.Serializer):
 
 
 class PasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
-    password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    old_password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    new_pass = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    new_pass2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
