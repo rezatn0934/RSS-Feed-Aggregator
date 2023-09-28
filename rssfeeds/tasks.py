@@ -53,6 +53,7 @@ def xml_link_creation(self, xml_link):
     channel, status = create_or_update_channel(xml_link, channel_data)
     if status != 'exist':
         channel.category.set(categories)
+        channel.save()
         podcast_data = parsed_data['podcast_data']
         create_items(model, channel, podcast_data)
 
