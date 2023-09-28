@@ -2,13 +2,14 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 
 from accounts.authentication import JWTAuthentication
 from .mixins import InteractionMixin
-from .models import Like, Comment, BookMark, Subscription
+from .models import Like, Comment, BookMark, Subscription, Recommendation
 from .utils import update_recommendations
 from .serializers import SubscriptionSerializer
+from .serializers import RecommendationSerializer
 
 
 class LikeView(InteractionMixin, APIView):
@@ -53,3 +54,12 @@ class SubscriptionView(GenericAPIView):
 
         update_recommendations(user=user, categories=categories, increment_count=-1)
         return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
+
+
+class RecommendationRetrieveView(RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = RecommendationSerializer
+
+    def get_queryset(self):
+        return Recommendation.objects.filter(user=self.request.user)
