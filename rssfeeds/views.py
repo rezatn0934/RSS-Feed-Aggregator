@@ -73,14 +73,12 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         channel = self.get_object()
         items = None
-
-        if hasattr(channel, 'podcast_set'):
+        if hasattr(channel, 'podcast_set') and (len(channel.podcast_set.all()) > 0):
             items = channel.podcast_set.all()
             items_serializer = PodcastSerializer(items, many=True)
-        elif hasattr(channel, 'news_set'):
+        elif hasattr(channel, 'news_set') and (len(channel.news_set.all()) > 0):
             items = channel.news_set.all()
             items_serializer = NewsSerializer(items, many=True)
-
         if items:
             data = {
                 'channel': self.get_serializer(channel).data,
