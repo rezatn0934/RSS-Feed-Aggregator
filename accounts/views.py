@@ -12,7 +12,7 @@ from rest_framework.viewsets import GenericViewSet, ViewSet
 from .authentication import AuthBackend, JWTAuthentication
 from .utils import generate_access_token, generate_refresh_token, jti_maker, get_random_string, custom_sen_mail
 from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
-    ResetPasswordEmailSerializer
+    ResetPasswordEmailSerializer, PasswordTokenSerializer
 from .models import User
 from .permisions import UserIsOwner
 
@@ -173,13 +173,14 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     def change_password(self, request, pk=None):
         user = self.get_object()
         serializer = PasswordSerializer(data=request.data)
-        if serializer.is_valid():
-            user.set_password(serializer.validated_data['password'])
+        serializer.is_valid(raise_exception=True)
+        old_password = serializer.validated_data['old_password']
+        new_pass = serializer.validated_data['new_pass']
+        if user.check_password(old_password):
+            user.set_password(new_pass)
             user.save()
             return Response({'status': 'password successfully changed'})
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Your old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgetPassword(APIView):
