@@ -198,16 +198,14 @@ LOGGING = {
     },
 
     "handlers": {
-
-        "handlers": {
-            "file": {
-                "level": "INFO",
-                "class": "logging.FileHandler",
-                "filename": BASE_DIR / "log.log",
-                "formatter": "verbose",
-            },
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "log.log",
+            "formatter": "verbose",
         },
     },
+
     "loggers": {
         "celery-logger": {
             "handlers": ["file"],
