@@ -9,11 +9,11 @@ from uuid import uuid4
 from django.core.mail import send_mail
 
 
-def generate_access_token(user_id, jti):
+def generate_access_token(user_id, jti, ttl):
     access_token_payload = {
         "token_type": "access",
         'user_id': user_id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=ttl),
         'iat': datetime.datetime.utcnow(),
         'jti': jti,
     }
