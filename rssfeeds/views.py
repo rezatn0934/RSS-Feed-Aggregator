@@ -116,8 +116,8 @@ class PodcastViewSet(CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, Ge
     ordering_fields = ['id', 'title', 'pub_Date']
 
 
+class NewsViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
 
-class NewsViewSet(CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving News items.
 
