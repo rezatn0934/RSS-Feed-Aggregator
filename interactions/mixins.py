@@ -10,6 +10,12 @@ from .utils import get_item_model, update_recommendations
 
 class InteractionMixin:
 
+    def post(self, request):
+        return self.create_object(request, self.model)
+
+    def delete(self, request):
+        return self.delete_object(request, self.model)
+
     def create_object(self, request, model, **kwargs):
 
         channel_id = request.data.get('channel_id')
