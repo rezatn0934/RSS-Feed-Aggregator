@@ -197,7 +197,7 @@ class ForgetPassword(APIView):
             token = get_random_string(6)
             caches['pass'].set(token, email)
             custom_sen_mail(subject='reset password', message=f'This is your {token}. Use it to change your password',
-                            receiver=user.email)
+                            receiver=user.get().email)
             return Response({'message': 'Password reset email sent successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'message': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
