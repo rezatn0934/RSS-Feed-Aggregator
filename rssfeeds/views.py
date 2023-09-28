@@ -94,7 +94,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
             )
 
 
-class PodcastViewSet(CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
+class PodcastViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for listing and retrieving Podcasts.
 
