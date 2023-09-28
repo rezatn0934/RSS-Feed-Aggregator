@@ -51,3 +51,14 @@ class PasswordSerializer(serializers.Serializer):
 class ResetPasswordEmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
+
+class PasswordTokenSerializer(serializers.Serializer):
+
+    token = serializers.CharField(style={"input_type": "token"}, write_only=True)
+    new_pass = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    new_pass2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError('Passwords must match!')
+        return attrs
