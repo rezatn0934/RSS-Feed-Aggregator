@@ -60,7 +60,7 @@ def xml_link_creation(self, xml_link):
 
 
 @shared_task(base=MyTask, bind=True, soft_time_limit=900, task_time_limit=1000)
-def update_rssfeeds():
+def update_rssfeeds(self):
     xml_links = XmlLink.objects.all()
     for xml_link in xml_links:
         xml_link_creation.delay(xml_link.xml_link)
