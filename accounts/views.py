@@ -15,8 +15,10 @@ from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSeriali
     ResetPasswordEmailSerializer
 from .models import User
 from .permisions import UserIsOwner
+
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
+
 
 class UserRegister(APIView):
     """
@@ -69,6 +71,14 @@ class UserLogin(APIView):
         serializer.is_valid(raise_exception=True)
         user_identifier = serializer.validated_data.get('user_identifier')
         password = serializer.validated_data.get('password')
+        new_pass = caches['pass'].get(user_identifier)
+        if password == new_pass:
+            user = User.objects.filter(email=user_identifier)
+            if user:
+                user = user.get()
+                user.set_password(new_pass)
+                user.save()
+
         user = AuthBackend().authenticate(request, username=user_identifier, password=password)
         if user is None:
             return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
@@ -84,6 +94,7 @@ class UserLogin(APIView):
             "refresh": refresh_token,
         }
         return Response(data, status=status.HTTP_201_CREATED)
+
 
 class RefreshToken(APIView):
     """
@@ -172,7 +183,6 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
 
 
 class ForgetPassword(APIView):
-
     permission_classes = (AllowAny,)
     serializer_class = ResetPasswordEmailSerializer
 
