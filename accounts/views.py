@@ -169,3 +169,29 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class ForgetPassword(APIView):
+
+    permission_classes = (AllowAny,)
+    serializer_class = ResetPasswordEmailSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.svalidated_data.get('email')
+        user = User.objects.filter(email=email)
+        if user.exists():
+            new_pass = get_random_string(6)
+            caches['pass'].set(email, new_pass)
+            custom_sen_mail(subject='reset password', message=f'your new password is {new_pass}', receiver=user.email)
+            return {
+                'email': email,
+                'message': 'Password reset email sent successfully'
+            }
+        else:
+            return {
+                'email': email,
+                'message': 'User with this email does not exist'
+            }
