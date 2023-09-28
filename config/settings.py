@@ -184,7 +184,6 @@ CELERY_BEAT_SCHEDULE = {
     'update_rssfeeds': {
         'task': 'rssfeeds.tasks.update_rssfeeds',
         'schedule': crontab(minute=0, hour=0),
-        'kwargs': {'xml_link': 'sdfssffg'}
     }
 }
 
