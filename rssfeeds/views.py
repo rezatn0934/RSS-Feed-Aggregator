@@ -1,18 +1,17 @@
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from accounts.authentication import JWTAuthentication
 from .mixins import AuthenticationMixin
 from .serializers import XmlLinkSerializer, ChannelSerializer, PodcastSerializer, NewsSerializer
 from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 
-class XmlLinkViewSet(CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+
+class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     ViewSet for managing XmlLinks, Channels, and Podcasts.
 
