@@ -130,6 +130,10 @@ class NewsViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, Retr
     Returns:
         Response: A JSON response containing a list of News items or a single News item
         along with appropriate status codes.
+
+    Permissions:
+        - POST, DELETE: Admin access required.
+        - GET: AllowAny access for listing News items.
     """
 
     serializer_class = NewsSerializer
