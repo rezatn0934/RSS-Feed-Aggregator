@@ -20,7 +20,7 @@ class ChannelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Channel
-        fields = ['id', 'title', 'description', 'last_update', 'language', 'subtitle',
+        fields = ['id', 'title', 'subscribed', 'description', 'last_update', 'language', 'subtitle',
                   'image', 'author', 'xml_link', 'category', 'owner']
         extra_kwargs = {
             'id': {'read_only': True}
@@ -28,8 +28,8 @@ class ChannelSerializer(serializers.ModelSerializer):
 
     def get_subscribed(self, obj):
         user = self.context['request'].user
-        return Like.objects.filter(
-            id=obj.pk,
+        return Subscription.objects.filter(
+            channel=obj,
             user=user
         ).exists()
 
