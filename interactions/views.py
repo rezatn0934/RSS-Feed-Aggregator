@@ -28,6 +28,8 @@ class BookMarkView(InteractionMixin, APIView):
 
 
 class SubscriptionView(GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = SubscriptionSerializer
     queryset = Subscription.objects.all()
 
