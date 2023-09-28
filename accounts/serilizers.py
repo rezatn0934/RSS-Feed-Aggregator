@@ -43,7 +43,7 @@ class PasswordSerializer(serializers.Serializer):
     new_pass2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
+        if attrs['new_pass'] != attrs['new_pass2']:
             raise serializers.ValidationError('Passwords must match!')
         return attrs
 
