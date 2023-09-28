@@ -11,7 +11,8 @@ from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 
 
-class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin,
+                     GenericViewSet):
     """
     ViewSet for managing XmlLinks, Channels, and Podcasts.
 
@@ -26,6 +27,11 @@ class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, L
 
     Returns:
         Response: A JSON response indicating success or failure along with appropriate status codes.
+
+
+    Permissions:
+        - POST, DELETE: Admin access required.
+        - GET: AllowAny access for listing News items.
     """
 
     serializer_class = XmlLinkSerializer
@@ -63,7 +69,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         along with appropriate status codes.
 
     Permissions:
-    - GET: AllowAny access for listing Channels.
+        - GET: AllowAny access for listing Channels.
     """
 
     serializer_class = ChannelSerializer
@@ -110,8 +116,8 @@ class PodcastViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, R
         along with appropriate status codes.
 
     Permissions:
-    - POST, DELETE: Admin access required.
-    - GET: AllowAny access for listing News items.
+        - POST, DELETE: Admin access required.
+        - GET: AllowAny access for listing News items.
     """
 
     serializer_class = PodcastSerializer
@@ -122,7 +128,6 @@ class PodcastViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, R
 
 
 class NewsViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericViewSet):
-
     """
     ViewSet for listing and retrieving News items.
 
