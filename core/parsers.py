@@ -177,7 +177,12 @@ class Parser(ABC):
             if item_data:
                 items.append(item_data)
 
-        return {'channel_data': channel_data, 'podcast_data': items}
+        sorted_items = sorted(items, key=lambda x: x['pub_date'] if x['pub_date'] else datetime.min)
+        print('2'*100)
+        print(sorted_items)
+        print('1'*100)
+        print(items)
+        return {'channel_data': channel_data, 'podcast_data': sorted_items}
 
 
 class PodcastParser(Parser):
