@@ -9,6 +9,9 @@ from .utils import get_item_model, update_recommendations
 
 
 class InteractionMixin:
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    model = None
 
     def post(self, request):
         return self.create_object(request, self.model)
