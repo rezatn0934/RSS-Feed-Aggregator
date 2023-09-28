@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Subscription, Comment
+from .models import Subscription, Comment, Recommendation
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -24,3 +24,9 @@ class CommentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True}
         }
+
+
+class RecommendationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recommendation
+        fields = ['user', 'category', 'count']
