@@ -56,10 +56,12 @@ class SubscriptionView(GenericAPIView):
         return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
 
 
-class RecommendationRetrieveView(RetrieveAPIView):
+class RecommendationRetrieveView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = RecommendationSerializer
 
-    def get_queryset(self):
-        return Recommendation.objects.filter(user=self.request.user)
+    def get(self, request):
+        recommendations = Recommendation.objects.filter(user=request.user)
+        serializer = self.serializer_class(recommendations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
