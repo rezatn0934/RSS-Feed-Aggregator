@@ -20,7 +20,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'content']
+        fields = ['id', 'user', 'content', 'created_at']
         extra_kwargs = {
             'id': {'read_only': True}
         }
