@@ -107,6 +107,10 @@ class PodcastViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, R
     Returns:
         Response: A JSON response containing a list of Podcasts or a single Podcast object
         along with appropriate status codes.
+
+    Permissions:
+    - POST, DELETE: Admin access required.
+    - GET: AllowAny access for listing News items.
     """
 
     serializer_class = PodcastSerializer
