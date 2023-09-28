@@ -29,7 +29,7 @@ class BookMarkView(InteractionMixin, APIView):
 
 class SubscriptionView(GenericAPIView):
     serializer_class = SubscriptionSerializer
-    queryset = Subscription.objrcts.all
+    queryset = Subscription.objects.all()
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -38,7 +38,7 @@ class SubscriptionView(GenericAPIView):
 
         channel = serializer.validated_data['channel']
         user = request.user
-        categories = channel.categories.all()
+        categories = channel.category.all()
 
         update_recommendations(user=user, categories=categories, increment_count=1)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
