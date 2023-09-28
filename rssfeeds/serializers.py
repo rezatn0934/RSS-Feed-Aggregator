@@ -28,10 +28,12 @@ class ChannelSerializer(serializers.ModelSerializer):
 
     def get_subscribed(self, obj):
         user = self.context['request'].user
-        return Subscription.objects.filter(
-            channel=obj,
-            user=user
-        ).exists()
+        if user.is_authenticated:
+            return Subscription.objects.filter(
+                channel=obj,
+                user=user
+            ).exists()
+        return False
 
 
 class BaseItemSerializer(serializers.ModelSerializer):
@@ -44,18 +46,25 @@ class BaseItemSerializer(serializers.ModelSerializer):
 
     def get_liked(self, obj):
         user = self.context['request'].user
-        content_type = ContentType.objects.get_for_model(obj)
-        return Like.objects.filter(
-            object_id=obj.pk,
-            content_type=content_type,
-            user=user
-        ).exists()
+        if user.is_authenticated:
+            content_type = ContentType.objects.get_for_model(obj)
+            return Like.objects.filter(
+                object_id=obj.pk,
+                content_type=content_type,
+                user=user
+            ).exists()
+        return False
 
     def get_bookmarked(self, obj):
         user = self.context['request'].user
-        content_type = ContentType.objects.get_for_model(obj)
-        return BookMark.objects.filter(
-            object_id=obj.pk, content_type=content_type, user=user).exists()
+        if user.is_authenticated:
+            content_type = ContentType.objects.get_for_model(obj)
+            return BookMark.objects.filter(
+                object_id=obj.pk,
+                content_type=content_type,
+                user=user
+            ).exists()
+        return False
 
     def get_comments(self, obj):
         content_type = ContentType.objects.get_for_model(obj)
