@@ -83,7 +83,7 @@ class UserLogin(APIView):
         if user is None:
             return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-        jti = jti_maker(request)
+        jti = jti_maker()
         access_token = generate_access_token(user.id, jti, access_token_lifetime)
         refresh_token = generate_refresh_token(user.id, jti, refresh_token_lifetime)
 
@@ -121,7 +121,7 @@ class RefreshToken(APIView):
         jti = payload["jti"]
         caches['auth'].delete(jti)
 
-        jti = jti_maker(request)
+        jti = jti_maker()
         access_token = generate_access_token(user.id, jti, access_token_lifetime)
         refresh_token = generate_refresh_token(user.id, jti, refresh_token_lifetime)
         caches['auth'].set(jti, user.id)

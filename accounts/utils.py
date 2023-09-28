@@ -36,7 +36,7 @@ def generate_refresh_token(user_id, jti, ttl):
     return refresh_token
 
 
-def jti_maker(request):
+def jti_maker():
     return uuid4().hex
 
 
