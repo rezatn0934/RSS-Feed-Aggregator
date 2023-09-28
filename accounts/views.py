@@ -18,7 +18,6 @@ from .permisions import UserIsOwner
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
 
-
 class UserRegister(APIView):
     """
     Register a new user.
@@ -45,7 +44,7 @@ class UserRegister(APIView):
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserLogin(ViewSet):
+class UserLogin(APIView):
     """
     Log in an existing user and issue access and refresh tokens.
 
