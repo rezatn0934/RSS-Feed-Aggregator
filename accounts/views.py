@@ -201,3 +201,24 @@ class ForgetPassword(APIView):
             return Response({'message': 'Password reset email sent successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'message': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangePasswordWithToken(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = PasswordTokenSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data['token']
+        new_pass = serializer.validated_data['new_pass']
+        cashed_email = caches['pass'].get(token)
+        if cashed_email:
+            user = User.objects.filter(email=cashed_email)
+            if user.exists():
+                user = user.get()
+                user.set_password(new_pass)
+                user.save()
+                return Response({'status': 'password successfully changed'})
+
+        return Response({'error': 'Your old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
