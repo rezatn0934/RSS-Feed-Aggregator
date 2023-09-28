@@ -22,9 +22,6 @@ class CommentView(InteractionMixin, APIView):
         content = request.data.get('content')
         return self.create_object(request, Comment, content=content)
 
-    def delete(self, request):
-        return self.delete_object(request, Comment)
-
 
 class BookMarkView(InteractionMixin, APIView):
     permission_classes = [IsAuthenticated]
