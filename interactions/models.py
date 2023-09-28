@@ -34,6 +34,9 @@ class Subscription(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='subscriptions')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = [['user', 'channel']]
+
     def __str__(self):
         return f'{self.channel} subscribed by {self.user}'
 
