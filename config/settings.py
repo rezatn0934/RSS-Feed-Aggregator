@@ -173,6 +173,11 @@ CACHES = {
         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
         "TIMEOUT": REDIS_CACHE_TTL,
     },
+    "pass": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/4",
+        "TIMEOUT": REDIS_CACHE_TTL,
+    },
 }
 
 CELERY_TASK_TRACK_STARTED = True
