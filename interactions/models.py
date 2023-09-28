@@ -59,3 +59,6 @@ class Recommendation(models.Model):
 
     def __str__(self):
         return f'{self.user.username} interest in: {self.category.name}'
+
+    class Meta:
+        ordering = ['-count']
