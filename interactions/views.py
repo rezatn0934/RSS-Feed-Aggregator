@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
+from accounts.authentication import JWTAuthentication
 from .mixins import InteractionMixin
 from .models import Like, Comment, BookMark, Subscription
 from .utils import update_recommendations
@@ -11,13 +12,7 @@ from .serializers import SubscriptionSerializer
 
 
 class LikeView(InteractionMixin, APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        return self.create_object(request, Like)
-
-    def delete(self, request):
-        return self.delete_object(request, Like)
+    model = Like
 
 
 class CommentView(InteractionMixin, APIView):
