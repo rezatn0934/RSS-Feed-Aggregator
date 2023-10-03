@@ -71,13 +71,6 @@ class UserLogin(APIView):
         serializer.is_valid(raise_exception=True)
         user_identifier = serializer.validated_data.get('user_identifier')
         password = serializer.validated_data.get('password')
-        new_pass = caches['pass'].get(user_identifier)
-        if password == new_pass:
-            user = User.objects.filter(email=user_identifier)
-            if user:
-                user = user.get()
-                user.set_password(new_pass)
-                user.save()
 
         user = AuthBackend().authenticate(request, username=user_identifier, password=password)
         if user is None:
@@ -167,7 +160,9 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated, UserIsOwner)
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    
+    def get_queryset(self):
+        return User.objects.filter(id=self.request.user.id)
 
     @action(detail=True, methods=['post'])
     def change_password(self, request, pk=None):
@@ -196,7 +191,8 @@ class ForgetPassword(APIView):
         if user.exists():
             token = get_random_string(6)
             caches['pass'].set(token, email)
-            custom_sen_mail(subject='reset password', message=f'This is your {token}. Use it to change your password',
+            custom_sen_mail(subject='reset password',
+                            message=f'This is your token {token}. Use it to change your password',
                             receiver=user.get().email)
             return Response({'message': 'Password reset email sent successfully'}, status=status.HTTP_201_CREATED)
         else:
