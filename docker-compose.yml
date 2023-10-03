@@ -1,4 +1,19 @@
 services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-alpine
+    networks:
+      - main
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - 5672:5672
+      - 15672:15672
+
 
   postgres:
     container_name: postgres
@@ -67,7 +82,6 @@ services:
     restart: always
 
   flower:
-    image: mher/flower:latest
     container_name: flower
     build: .
     command: celery -A config flower
