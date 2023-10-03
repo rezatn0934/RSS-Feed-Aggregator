@@ -206,13 +206,24 @@ LOGGING = {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": BASE_DIR / "log.log",
+            "filename": BASE_DIR / "logs/celery.log",
+            "formatter": "verbose",
+        },
+        "parser": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs/parser.log",
             "formatter": "verbose",
         },
     },
 
     "loggers": {
         "celery-logger": {
+            "handlers": ["file"],
+            "level": "INFO",
+            'propagate': False
+        },
+        "parser-logger": {
             "handlers": ["file"],
             "level": "INFO",
             'propagate': False
