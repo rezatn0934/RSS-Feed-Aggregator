@@ -164,6 +164,12 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
 
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.first()
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     @action(detail=True, methods=['post'])
     def change_password(self, request, pk=None):
         user = self.get_object()
