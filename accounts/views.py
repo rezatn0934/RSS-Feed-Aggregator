@@ -1,6 +1,9 @@
-import jwt
 from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import caches
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
@@ -10,7 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
-from .utils import generate_access_token, generate_refresh_token, jti_maker, get_random_string, custom_sen_mail
+from .utils import generate_access_token, generate_refresh_token, jti_maker, custom_sen_mail
 from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
     ResetPasswordEmailSerializer, PasswordTokenSerializer
 from .models import User
@@ -109,7 +112,9 @@ class RefreshToken(APIView):
 
     def post(self, request):
         refresh_token = request.POST.get("refresh_token").encode("utf-8")
-        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
+        payload = JWTAuthentication.get_payload_from_refresh_token(refresh_token)
+        JWTAuthentication.validate_refresh_token(payload)
+
         user = JWTAuthentication.get_user_from_payload(payload)
         jti = payload["jti"]
         caches['auth'].delete(jti)
