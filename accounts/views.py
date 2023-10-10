@@ -1,15 +1,11 @@
 import jwt
 from django.conf import settings
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import caches
-from django.utils.http import urlsafe_base64_encode
-from jwt.utils import force_bytes
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
@@ -226,20 +222,12 @@ class ChangePasswordWithToken(APIView):
     permission_classes = (AllowAny,)
     serializer_class = PasswordTokenSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+    def patch(self, request, *args, **kwargs):
+        """
+        Verify token & encoded_pk and then reset the password.
+        """
+        serializer = self.serializer_class(
+            data=request.data, context={"kwargs": kwargs}
+        )
         serializer.is_valid(raise_exception=True)
-        token = serializer.validated_data['token']
-        new_pass = serializer.validated_data['new_pass']
-        cashed_email = caches['pass'].get(token)
-        if cashed_email:
-            user = User.objects.filter(email=cashed_email)
-            if user.exists():
-                user = user.get()
-                user.set_password(new_pass)
-                user.save()
-                return Response({'status': 'password successfully changed'})
-
-            return Response({'error': "User  doesn't exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({'error': 'Your Token is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Password reset complete"}, status=status.HTTP_200_OK)
