@@ -1,11 +1,15 @@
 import jwt
 from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import caches
+from django.utils.http import urlsafe_base64_encode
+from jwt.utils import force_bytes
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
@@ -160,7 +164,7 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated, UserIsOwner)
     serializer_class = UserSerializer
-    
+
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
 
@@ -195,14 +199,27 @@ class ForgetPassword(APIView):
         email = serializer.validated_data.get('email')
         user = User.objects.filter(email=email)
         if user.exists():
-            token = get_random_string(6)
-            caches['pass'].set(token, email)
-            custom_sen_mail(subject='reset password',
-                            message=f'This is your token {token}. Use it to change your password',
-                            receiver=user.get().email)
-            return Response({'message': 'Password reset email sent successfully'}, status=status.HTTP_201_CREATED)
+            user = user.get()
+
+            encoded_pk = urlsafe_base64_encode(force_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+
+            reset_url = reverse("accounts:change_password_token", kwargs={"encoded_pk": encoded_pk, "token": token})
+
+            reset_link = f"{request.scheme}://{request.get_host()}{reset_url}"
+            custom_sen_mail('reset password', f"Your password rest link: {reset_link}", user.email)
+            return Response(
+                {
+                    "message":
+                        f"Your password rest link wre emalied"
+                },
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({'message': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "User doesn't exists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class ChangePasswordWithToken(APIView):
