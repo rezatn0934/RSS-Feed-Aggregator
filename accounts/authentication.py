@@ -39,20 +39,12 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
     def authenticate(self, request):
 
-        refresh_token = request.data.get("refresh_token")
-        if not refresh_token:
-            return None
-        payload = self.get_payload_from_refresh_token(refresh_token)
-
-        user = self.get_user_from_payload(payload)
-
-        self.validate_refresh_token(payload)
-
         authorization_header = self.get_authorization_header(request)
 
         self.check_prefix(authorization_header)
 
         payload = self.get_payload_from_access_token(authorization_header)
+        user = self.get_user_from_payload(payload)
 
         return user, payload
 
