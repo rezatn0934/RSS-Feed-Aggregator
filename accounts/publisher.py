@@ -12,3 +12,8 @@ class EventPublisher:
         self.credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.RABBITMQ_HOST))
         self.channel = self.connection.channel()
+
+    def declare_queue(self, queue_name):
+        print(f"Trying to declare queue({queue_name})...")
+        self.channel.queue_declare(queue=queue_name)
+
