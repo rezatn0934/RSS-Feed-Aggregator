@@ -17,3 +17,14 @@ class EventPublisher:
         print(f"Trying to declare queue({queue_name})...")
         self.channel.queue_declare(queue=queue_name)
 
+    def publish_event(self, queue_name, event_type, data, exchange=''):
+        event_data = {
+            'event_type': event_type,
+            'data': data
+        }
+
+        message = json.dumps(event_data)
+        self.declare_queue(queue_name=queue_name)
+        self.channel.basic_publish(exchange=exchange, routing_key=queue_name, body=message)
+        print(f"Sent message. Exchange: {exchange}, Routing Key: {queue_name}")
+
