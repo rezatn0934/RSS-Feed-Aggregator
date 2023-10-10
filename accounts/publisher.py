@@ -28,3 +28,5 @@ class EventPublisher:
         self.channel.basic_publish(exchange=exchange, routing_key=queue_name, body=message)
         print(f"Sent message. Exchange: {exchange}, Routing Key: {queue_name}")
 
+    def close_connection(self):
+        self.connection.close()
