@@ -64,8 +64,6 @@ def log_task_info(task_name, level, message, task_id, args, kwargs, retval=' ', 
         'message': message,
         'task_id': task_id,
         'task_name': task_name,
-        'args': args,
-        'kwargs': kwargs,
         'input_data': {
             'args': args,
             'kwargs': kwargs
