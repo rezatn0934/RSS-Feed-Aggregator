@@ -19,3 +19,7 @@ class ElasticHandler(logging.Handler):
         except Exception:
             self.handleError(record)
 
+
+class LogSender:
+    def __init__(self, es):
+        self.es = es
