@@ -27,3 +27,7 @@ class EventConsumer(ABC):
         self.declare_queue(queue_name=queue_name)
         self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback, auto_ack=True)
         self.channel.start_consuming()
+
+    @abstractmethod
+    def callback(self, ch, method, properties, body):
+        pass
