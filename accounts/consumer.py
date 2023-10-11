@@ -31,3 +31,6 @@ class EventConsumer(ABC):
     @abstractmethod
     def callback(self, ch, method, properties, body):
         pass
+
+    def close_connection(self):
+        self.connection.close()
