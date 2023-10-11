@@ -57,6 +57,15 @@ def xml_link_creation(self, xml_link):
         podcast_data = parsed_data['podcast_data']
         create_items(model, channel, podcast_data)
 
+    if status == 'update':
+        data = {
+            'channel_id': channel.id,
+            'data': f'{channel.title} has been updated'
+        }
+        publisher = EventPublisher()
+        publisher.publish_event('update_rssfeed', 'update_rss', data=data)
+        publisher.close_connection()
+
     return {
         'status': 'ok',
         'message': f'Task {self.name} completed successfully for XML link: {xml_link}'
