@@ -12,6 +12,19 @@ services:
       - 5672:5672
       - 15672:15672
 
+  consumers:
+    container_name: consumers
+    build: .
+    command: python manage.py launch_consumers
+    volumes:
+      - .:/code/
+    networks:
+      - main
+    depends_on:
+      - rabbitmq
+      - app
+    restart: always
+
   postgres:
     container_name: postgres
     image: postgres:15-alpine
