@@ -2,14 +2,15 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView
 
 from accounts.authentication import JWTAuthentication
 from .mixins import InteractionMixin
 from .models import Like, Comment, BookMark, Subscription, Recommendation
 from .utils import update_recommendations
 from .serializers import SubscriptionSerializer
-from .serializers import RecommendationSerializer
+from rssfeeds.models import Channel
+from rssfeeds.serializers import ChannelSerializer
 
 
 class LikeView(InteractionMixin, APIView):
@@ -59,9 +60,13 @@ class SubscriptionView(GenericAPIView):
 class RecommendationRetrieveView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = RecommendationSerializer
 
     def get(self, request):
-        recommendations = Recommendation.objects.filter(user=request.user)
-        serializer = self.serializer_class(recommendations, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        recommendation = Recommendation.objects.filter(user=request.user).order_by('-count').first()
+
+        if recommendation:
+            channels = Channel.objects.filter(category=recommendation.category)[:5]
+            serializer = ChannelSerializer(channels, many=True, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "No recommendations available for this user."}, status=status.HTTP_404_NOT_FOUND)
