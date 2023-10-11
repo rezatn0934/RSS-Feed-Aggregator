@@ -6,10 +6,8 @@ services:
       - main
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
     restart: always
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     ports:
       - 5672:5672
       - 15672:15672
@@ -36,6 +34,7 @@ services:
       - .:/code/
     depends_on:
       - postgres
+      - elasticsearch
     ports:
       - 8000:8000
     networks:
@@ -63,7 +62,7 @@ services:
     volumes:
       - .:/code/
     environment:
-      - C_FORCE_ROOT="true"
+      - C_FORCE_ROOT=true
     networks:
       - main
     restart: always
@@ -73,7 +72,7 @@ services:
     build: .
     volumes:
       - .:/code/
-    command: celery -A config beat -l info
+    command: celery -A config beat -l info  #-B read
     depends_on:
       - celery
     networks:
