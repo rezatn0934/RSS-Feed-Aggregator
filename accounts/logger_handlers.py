@@ -26,7 +26,8 @@ class LogSender:
 
     def writeLog(self, msg: logging.LogRecord, formatter):
         index_name = f'log_{time.strftime("%Y_%m_%d")}'
-        timestamp = datetime.utcnow().strftime('%d/%b/%Y:%H:%M:%S +0000')
+        timestamp = datetime.utcnow().strftime('%d/%b/%Y-%H:%M:%S +0000')
+
         log_data = json.loads(formatter(msg))
         log_data['timestamp'] = timestamp
 
