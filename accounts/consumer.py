@@ -18,3 +18,8 @@ class EventConsumer(ABC):
         self.credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
         self.channel = self.connection.channel()
+
+    def declare_queue(self, queue_name):
+        print(f"Trying to declare queue({queue_name})...")
+        self.channel.queue_declare(queue=queue_name)
+
