@@ -2,7 +2,6 @@ from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-
 from rssfeeds.models import Channel
 from core.models import Category
 
@@ -53,7 +52,8 @@ class BookMark(models.Model):
 
 
 class Recommendation(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='category_recommendations')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                             related_name='category_recommendations')
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=0)
 
@@ -62,3 +62,16 @@ class Recommendation(models.Model):
 
     class Meta:
         ordering = ['-count']
+
+
+class Notification(models.Model):
+    title = models.CharField(max_length=255)
+    notification_type = models.CharField(max_length=50)
+    recipients = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='notifications')
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    date_read = models.DateTimeField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Notification: {self.title}'
