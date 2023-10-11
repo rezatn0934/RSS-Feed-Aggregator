@@ -86,6 +86,13 @@ class UserLogin(APIView):
         user = AuthBackend().authenticate(request, username=user_identifier, password=password)
         if user is None:
             return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+        data = {
+            'user_id': user.id,
+            'data': f'{user.username} has logged in successfully using {device_type}'}
+        publisher = EventPublisher()
+        publisher.publish_event('login', 'login', data=data)
+        publisher.close_connection()
 
         jti = jti_maker()
         access_token = generate_access_token(user.id, jti, access_token_lifetime)
