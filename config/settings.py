@@ -135,23 +135,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_THROTTLE_CLASSES': [
-    #     'rest_framework.throttling.AnonRateThrottle',
-    #     'rest_framework.throttling.UserRateThrottle'
-    # ],
-    # 'DEFAULT_THROTTLE_RATES': {
-    #     'anon': '2/minute',
-    #     'user': '5/minute'
-    # },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'COERCE_DECIMAL_TO_STRING': False,
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'RSS Feed Aggregator API',
     'VERSION': '1.0.0',
 }
+
 JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
@@ -193,7 +187,7 @@ CELERY_TIME_ZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'update_rssfeeds': {
         'task': 'rssfeeds.tasks.update_rssfeeds',
-        'schedule': crontab(minute=0, hour=0),
+        'schedule': crontab(minute=0, hour=3),
     }
 }
 
