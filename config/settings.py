@@ -232,6 +232,8 @@ LOGGING = {
 
     },
 }
+ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST')
+ELASTICSEARCH_PORT = os.environ.get('ELASTICSEARCH_PORT')
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
