@@ -15,3 +15,7 @@ class LoggingMiddleware:
         log_data = log_entry(request, response)
         log_to_elasticsearch(log_data, log_level='info')
         return response
+
+    def process_exception(self, request, exception):
+        log_data = log_entry(request, None, exception)
+        log_to_elasticsearch(log_data, log_level='error')
