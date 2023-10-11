@@ -1,3 +1,6 @@
+import json
+import logging
+
 from core.parsers import PodcastParser, NewsParser
 from core.models import Category
 from .models import Podcast, News, Channel
@@ -48,3 +51,29 @@ def create_items(model, channel, podcast_data):
     podcast_items = (model(channel=channel, **item) for item in podcast_data if
                      not model.objects.filter(guid=item.get("guid")).exists())
     model.objects.bulk_create(podcast_items)
+
+
+logger = logging.getLogger('elastic-logger')
+
+
+def log_task_info(task_name, level, message, task_id, args, kwargs, retval=' ', exception=' ', retry_count=' ',
+                  max_retries=' ', retry_eta=' '):
+
+    log_data = {
+        'level': level,
+        'message': message,
+        'task_id': task_id,
+        'task_name': task_name,
+        'args': args,
+        'kwargs': kwargs,
+        'input_data': {
+            'args': args,
+            'kwargs': kwargs
+        },
+        'output_data': retval,
+        'exception': str(exception) if exception else None,
+        'retry_count': retry_count,
+        'max_retries': max_retries,
+        'retry_eta': retry_eta
+    }
+    logger.log(getattr(logging, level.upper()), json.dumps(log_data))
