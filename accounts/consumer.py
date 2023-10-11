@@ -23,3 +23,7 @@ class EventConsumer(ABC):
         print(f"Trying to declare queue({queue_name})...")
         self.channel.queue_declare(queue=queue_name)
 
+    def consume_events(self, queue_name):
+        self.declare_queue(queue_name=queue_name)
+        self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback, auto_ack=True)
+        self.channel.start_consuming()
