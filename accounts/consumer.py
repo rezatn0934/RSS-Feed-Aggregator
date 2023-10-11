@@ -55,3 +55,25 @@ class UserEventConsumer(EventConsumer):
         print(f"Received event: {self.event_type} for user: {user.username}")
 
 
+class UpdateRSSConsumer(EventConsumer):
+    def callback(self, ch, method, properties, body):
+        print(f"Received event: {self.event_type} for RSS update")
+        event_data = json.loads(body)
+        data = event_data.get('data')
+        channel_id = data['channel_id']
+        message = data['data']
+        subscribers = Subscription.objects.filter(channel=Channel.objects.get(id=channel_id))
+
+        notification = Notification.objects.create(
+            title=self.event_type,
+            notification_type='info',
+            message=message
+        )
+
+        for subscriber in subscribers:
+            user = User.objects.get(id=subscriber.user_id)
+            notification.recipients.add(user)
+
+        notification.save()
+        self.channel.basic_ack(delivery_tag=method.delivery_tag)
+
