@@ -18,6 +18,7 @@ from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSeriali
     ResetPasswordEmailSerializer, PasswordTokenSerializer
 from .models import User
 from .permisions import UserIsOwner
+from .publisher import EventPublisher
 
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
@@ -44,7 +45,14 @@ class UserRegister(APIView):
     def post(self, request):
         ser_data = UserRegisterSerializer(data=request.POST)
         if ser_data.is_valid():
-            ser_data.create(ser_data.validated_data)
+            user = ser_data.save()
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has been registered successfully using {device_type}'}
+            publisher = EventPublisher()
+            publisher.publish_event('register', 'register', data=data)
+            publisher.close_connection()
             return Response(ser_data.data, status=status.HTTP_201_CREATED)
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
