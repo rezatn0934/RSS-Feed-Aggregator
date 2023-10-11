@@ -34,3 +34,24 @@ class EventConsumer(ABC):
 
     def close_connection(self):
         self.connection.close()
+
+
+class UserEventConsumer(EventConsumer):
+    def callback(self, ch, method, properties, body):
+        event_data = json.loads(body)
+        data = event_data.get('data')
+        user_id = data['user_id']
+        message = data['data']
+        notification = Notification.objects.create(
+            title=self.event_type,
+            notification_type='info',
+            message=message
+        )
+        user = User.objects.get(id=user_id)
+        notification.recipients.add(user)
+
+        notification.save()
+        self.channel.basic_ack(delivery_tag=method.delivery_tag)
+        print(f"Received event: {self.event_type} for user: {user.username}")
+
+
