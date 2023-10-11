@@ -65,4 +65,8 @@ def update_rssfeeds(self):
     xml_links = XmlLink.objects.all()
     for xml_link in xml_links:
         xml_link_creation.delay(xml_link.xml_link)
-    return 'ok'
+
+    return {
+        'status': 'ok',
+        'message': f'Task {self.name} completed successfully for {len(xml_links)} XML links'
+    }
