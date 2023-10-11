@@ -71,9 +71,12 @@ def log_entry(request, response, exception=None):
     referer = request.META.get('HTTP_REFERER', ' ')
     user_agent = request.META.get('HTTP_USER_AGENT', ' ')
     elapsed_time = response.elapsed.total_seconds() if hasattr(response, 'elapsed') else None
+    if status_code == 500:
+        message = 'Internal Server Error: An unexpected error occurred while processing the request.'
+    else:
+        message = str(exception) if exception else 'Request processed successfully'
 
-    message = str(exception) if exception else 'Request processed successfully'
-    event = f"{request.resolver_match.app_names}.{request.resolver_match.url_name}"
+    event = f"{request.resolver_match.app_names[0]}.{request.resolver_match.url_name}"
     return {
         'remote_host': remote_host,
         'user_info': user_info,
