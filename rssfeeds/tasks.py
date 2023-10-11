@@ -57,7 +57,10 @@ def xml_link_creation(self, xml_link):
         podcast_data = parsed_data['podcast_data']
         create_items(model, channel, podcast_data)
 
-    return 'ok'
+    return {
+        'status': 'ok',
+        'message': f'Task {self.name} completed successfully for XML link: {xml_link}'
+    }
 
 
 @shared_task(base=MyTask, bind=True, soft_time_limit=900, task_time_limit=1000)
