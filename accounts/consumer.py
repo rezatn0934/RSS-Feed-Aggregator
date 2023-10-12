@@ -70,7 +70,14 @@ class Context:
         """
         self._strategy = strategy
 
+    def start_consuming(self, queue_name) -> None:
+        """
+        Starts consuming events using the selected strategy.
 
+        Args:
+            queue_name (str): The name of the queue to consume events from.
+        """
+        self._strategy.consume_events(queue_name=queue_name)
 
 
 class UserEventConsumer(EventConsumer):
