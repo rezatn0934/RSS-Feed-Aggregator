@@ -9,8 +9,6 @@ class MyTask(Task):
     retry_backoff = True
     retry_jitter = False
     task_acks_late = True
-    worker_concurrency = 4
-    prefetch_multiplier = 1
 
     def retry(self, args=None, kwargs=None, exc=None, throw=True,
               eta=None, countdown=None, max_retries=None, **options):
