@@ -8,6 +8,8 @@ from uuid import uuid4
 
 from django.core.mail import send_mail
 
+from accounts.publishers import EventPublisher
+
 
 def generate_access_token(user_id, jti, ttl):
     access_token_payload = {
@@ -90,3 +92,8 @@ def log_entry(request, response, exception=None):
         'event': event,
     }
 
+
+def publish_event(event_type, queue_name, data):
+    publisher = EventPublisher()
+    publisher.publish_event(queue_name=queue_name, event_type=event_type, data=data)
+    publisher.close_connection()
