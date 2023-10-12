@@ -24,6 +24,12 @@ class EventConsumer(ABC):
     """
 
     def __init__(self, event_type):
+        """
+        Initializes an EventConsumer instance.
+
+        Args:
+            event_type (str): The type of event this consumer handles.
+        """
         self.event_type = event_type
         self.credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.RABBITMQ_HOST))
