@@ -8,7 +8,6 @@ from rssfeeds.models import Channel
 from .models import User
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-settings.configure()
 
 
 class EventConsumer(ABC):
