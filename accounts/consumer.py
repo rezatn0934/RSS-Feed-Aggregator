@@ -8,9 +8,21 @@ from rssfeeds.models import Channel
 from .models import User
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+settings.configure()
 
 
 class EventConsumer(ABC):
+    """
+    EventConsumer is an abstract base class defining the common structure for event consumers.
+    Concrete event consumer classes will extend this and provide their own callback implementations.
+
+    Attributes:
+        event_type (str): The type of event this consumer handles.
+        credentials (pika.PlainCredentials): Credentials for connecting to RabbitMQ.
+        connection (pika.BlockingConnection): Connection to RabbitMQ.
+        channel (pika.channel.Channel): Channel for communication with RabbitMQ.
+    """
+
     def __init__(self, event_type):
         self.event_type = event_type
         self.credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
