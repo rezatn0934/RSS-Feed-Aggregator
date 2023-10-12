@@ -3,7 +3,7 @@ import os
 import pika
 from django.conf import settings
 from abc import ABC, abstractmethod
-from interactions.models import Notification, Subscription
+from interactions.models import Notification, Subscription, ActivityLog
 from rssfeeds.models import Channel
 from .models import User
 
@@ -157,16 +157,21 @@ class UserEventConsumer(EventConsumer):
         event_data = json.loads(body)
         data = event_data.get('data')
         user_id = data['user_id']
-        message = data['data']
-        notification = Notification.objects.create(
-            title=self.event_type,
-            notification_type='info',
-            message=message
-        )
         user = User.objects.get(id=user_id)
-        notification.recipients.add(user)
+        message = data['data']
 
-        notification.save()
+        if self.event_type in ['login', 'register']:
+            notification = Notification.objects.create(
+                title=self.event_type,
+                notification_type='info',
+                message=message
+            )
+            notification.recipients.add(user)
+
+            notification.save()
+
+        ActivityLog.objects.update_or_create(actor=user, action_type=self.event_type, remark=message)
+
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
         print(f"Received event: {self.event_type} for user: {user.username}")
 
