@@ -78,21 +78,11 @@ class Notification(models.Model):
 
 
 class ActivityLog(models.Model):
-    LOGIN, LOGOUT, LOGIN_FAILED = "Login", "Logout", "Login Failed"
-    ACTION_TYPES = [
-        (LOGIN, LOGIN),
-        (LOGOUT, LOGOUT),
-        (LOGIN_FAILED, LOGIN_FAILED),
-    ]
 
-    SUCCESS, FAILED = "Success", "Failed"
-    ACTION_STATUS = [(SUCCESS, SUCCESS), (FAILED, FAILED)]
-
-    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-    action_type = models.CharField(choices=ACTION_TYPES, max_length=15)
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, unique=True)
+    action_type = models.CharField(max_length=20)
     action_time = models.DateTimeField(auto_now_add=True)
     remarks = models.TextField(blank=True, null=True)
-    status = models.CharField(choices=ACTION_STATUS, max_length=7, default=SUCCESS)
 
     def __str__(self) -> str:
         return f"{self.action_type} by {self.actor} on {self.action_time}"
