@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 from .category_node import CategoryNode
 import logging
 
-logger = logging.getLogger('parser-logger')
+logger = logging.getLogger('elastic-logger')
+
 
 class Parser(ABC):
     """
