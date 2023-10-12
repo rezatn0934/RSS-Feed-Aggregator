@@ -3,6 +3,7 @@ from accounts.publisher import EventPublisher
 from .utils import parse_data, create_or_update_categories, create_or_update_channel, create_items, log_task_info
 from .models import XmlLink
 
+
 class MyTask(Task):
     autoretry_for = (Exception,)
     retry_kwargs = {'max_retries': 5}
@@ -43,7 +44,6 @@ def xml_link_creation(self, xml_link):
         podcast_data = parsed_data['podcast_data']
         create_items(model, channel, podcast_data)
 
-    if status == 'update':
         data = {
             'channel_id': channel.id,
             'data': f'{channel.title} has been updated'
