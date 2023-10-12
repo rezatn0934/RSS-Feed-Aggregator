@@ -79,6 +79,9 @@ class EventConsumer(ABC):
         pass
 
     def close_connection(self):
+        """
+        Closes the connection to RabbitMQ.
+        """
         self.connection.close()
 
 
