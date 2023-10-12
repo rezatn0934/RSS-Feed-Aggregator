@@ -228,6 +228,13 @@ class ForgetPassword(APIView):
 
             reset_link = f"{request.scheme}://{request.get_host()}{reset_url}"
             send_email_task.delay(reset_link, email)
+            user = request.user
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has requested for forget password using {device_type}'}
+
+            publish_event(event_type='forget_pass', queue_name='forget_pass', data=data)
             return Response(
                 {
                     "message":
