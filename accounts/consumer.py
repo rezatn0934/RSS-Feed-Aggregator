@@ -46,6 +46,12 @@ class EventConsumer(ABC):
         self.channel.queue_declare(queue=queue_name)
 
     def consume_events(self, queue_name):
+        """
+        Begins consuming events from the specified queue.
+
+        Args:
+            queue_name (str): The name of the queue to consume events from.
+        """
         self.declare_queue(queue_name=queue_name)
         self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback, auto_ack=True)
         self.channel.start_consuming()
