@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
+from .tasks import send_email_task
 from .utils import generate_access_token, generate_refresh_token, jti_maker, custom_sen_mail
 from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
     ResetPasswordEmailSerializer, PasswordTokenSerializer
@@ -223,11 +224,11 @@ class ForgetPassword(APIView):
             reset_url = reverse("accounts:change_password_token", kwargs={"encoded_pk": encoded_pk, "token": token})
 
             reset_link = f"{request.scheme}://{request.get_host()}{reset_url}"
-            custom_sen_mail('reset password', f"Your password rest link: {reset_link}", user.email)
+            send_email_task.delay(reset_link, email)
             return Response(
                 {
                     "message":
-                        f"Your password rest link wre emalied"
+                        f"Your password reset password link were emailed"
                 },
                 status=status.HTTP_200_OK,
             )
