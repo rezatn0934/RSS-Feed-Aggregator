@@ -60,6 +60,18 @@ class Context:
         """
         return self._strategy
 
+    @strategy.setter
+    def strategy(self, strategy: EventConsumer) -> None:
+        """
+        Sets a new event consumer strategy.
+
+        Args:
+            strategy (EventConsumer): The new event consumer strategy.
+        """
+        self._strategy = strategy
+
+
+
 
 class UserEventConsumer(EventConsumer):
     def callback(self, ch, method, properties, body):
