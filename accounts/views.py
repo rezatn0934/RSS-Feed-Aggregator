@@ -14,7 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
 from .tasks import send_email_task
-from .utils import generate_access_token, generate_refresh_token, jti_maker, custom_sen_mail
+from .utils import generate_access_token, generate_refresh_token, jti_maker, custom_sen_mail, publish_event
 from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
     ResetPasswordEmailSerializer, PasswordTokenSerializer
 from .models import User
@@ -51,9 +51,8 @@ class UserRegister(APIView):
             data = {
                 'user_id': user.id,
                 'data': f'{user.username} has been registered successfully using {device_type}'}
-            publisher = EventPublisher()
-            publisher.publish_event('register', 'register', data=data)
-            publisher.close_connection()
+
+            publish_event(event_type='login', queue_name='login', data=data)
             return Response(ser_data.data, status=status.HTTP_201_CREATED)
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -91,9 +90,7 @@ class UserLogin(APIView):
         data = {
             'user_id': user.id,
             'data': f'{user.username} has logged in successfully using {device_type}'}
-        publisher = EventPublisher()
-        publisher.publish_event('login', 'login', data=data)
-        publisher.close_connection()
+        publish_event(event_type='login', queue_name='login', data=data)
 
         jti = jti_maker()
         access_token = generate_access_token(user.id, jti, access_token_lifetime)
@@ -171,7 +168,13 @@ class LogoutView(APIView):
             payload = request.auth
             jti = payload["jti"]
             caches['auth'].delete(jti)
+            user = request.user
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has been logout successfully using {device_type}'}
 
+            publish_event(event_type='logout', queue_name='logout', data=data)
             return Response({"message": "Successful Logout"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
