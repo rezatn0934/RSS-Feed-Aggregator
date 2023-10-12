@@ -36,6 +36,12 @@ class EventConsumer(ABC):
         self.channel = self.connection.channel()
 
     def declare_queue(self, queue_name):
+        """
+        Declares a queue in RabbitMQ.
+
+        Args:
+            queue_name (str): The name of the queue to declare.
+        """
         print(f"Trying to declare queue({queue_name})...")
         self.channel.queue_declare(queue=queue_name)
 
