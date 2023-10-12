@@ -1,5 +1,5 @@
 from celery import shared_task, Task
-from accounts.publisher import EventPublisher
+from accounts.publishers import EventPublisher
 from .utils import parse_data, create_or_update_categories, create_or_update_channel, create_items, log_task_info
 from .models import XmlLink, Channel
 

@@ -18,7 +18,7 @@ from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSeriali
     ResetPasswordEmailSerializer, PasswordTokenSerializer
 from .models import User
 from .permisions import UserIsOwner
-from .publisher import EventPublisher
+from .publishers import EventPublisher
 
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
