@@ -2,6 +2,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from .models import User
+from .utils import publish_event
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -55,7 +56,6 @@ class ResetPasswordEmailSerializer(serializers.Serializer):
 
 
 class PasswordTokenSerializer(serializers.Serializer):
-
     new_pass = serializers.CharField(style={"input_type": "password"}, write_only=True)
     new_pass2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
@@ -77,4 +77,12 @@ class PasswordTokenSerializer(serializers.Serializer):
 
         user.set_password(password)
         user.save()
+        request = self.context.get('request')
+        device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+        data = {
+            'user_id': user.id,
+            'data': f'{user.username} has reset his password with url link using {device_type}'}
+
+        publish_event(event_type='reset_password', queue_name='reset_password', data=data)
+
         return attrs
