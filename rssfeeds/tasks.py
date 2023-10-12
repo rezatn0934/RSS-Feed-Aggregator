@@ -66,6 +66,12 @@ def update_rssfeeds(self):
             xml_link_creation.delay(xml_link.xml_link)
         else:
             xml_link.delete()
+            log_task_info(
+                task_name='update_rssfeeds', level='info',
+                message=f'XML link deleted due to no related channel: {xml_link.xml_link}',
+                task_id=self.request.id, args=[xml_link.xml_link], retval='XML link deleted', kwargs={}
+            )
+
     return {
         'status': 'ok',
         'message': f'Task {self.name} completed successfully for {len(xml_links)} XML links'
