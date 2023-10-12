@@ -130,7 +130,30 @@ class Context:
 
 
 class UserEventConsumer(EventConsumer):
+    """
+    Event consumer for handling user-related events.
+    """
+
     def callback(self, ch, method, properties, body):
+        """
+        Callback method to process user-related events received from RabbitMQ.
+
+        Args:
+            ch: pika.channel.Channel
+                The channel object through which the message was received.
+
+            method: pika.spec.Basic.Deliver
+                Delivery metadata such as delivery tag, redelivered flag, exchange, etc.
+
+            properties: pika.spec.BasicProperties
+                Properties of the message like content type, headers, etc.
+
+            body: bytes
+                The message body in bytes.
+
+        Note:
+            This method will be called by RabbitMQ when a new message is received.
+        """
         event_data = json.loads(body)
         data = event_data.get('data')
         user_id = data['user_id']
@@ -149,6 +172,10 @@ class UserEventConsumer(EventConsumer):
 
 
 class UpdateRSSConsumer(EventConsumer):
+    """
+    Event consumer for handling RSS update events.
+    """
+
     def callback(self, ch, method, properties, body):
         """
         Callback method to process RSS update events received from RabbitMQ.
