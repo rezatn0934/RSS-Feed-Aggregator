@@ -24,22 +24,15 @@ class Command(BaseCommand):
             options: Additional command-line options.
         """
 
-        # Create instances of event consumers for different event types
-        login_consumer = UserEventConsumer(event_type='login')
-        register_consumer = UserEventConsumer(event_type='register')
-        update_rss_consumer = UpdateRSSConsumer(event_type='update_rss')
+        event_types = ['login', 'register', 'logout', 'change_pass', 'forget_pass', 'reset_password', 'update_rss']
+        queue_names = ['login', 'register', 'logout', 'change_pass', 'forget_pass', 'reset_password', 'update_rss']
 
-        # Create contexts for each consumer
-        context1 = Context(login_consumer)
-        context2 = Context(register_consumer)
-        context3 = Context(update_rss_consumer)
+        consumers = [UserEventConsumer(event_type=event_type) for event_type in event_types]
 
-        # Start separate threads to consume events for each type
-        thread1 = threading.Thread(target=context1.start_consuming, kwargs={'queue_name': 'login'})
-        thread2 = threading.Thread(target=context2.start_consuming, kwargs={'queue_name': 'register'})
-        thread3 = threading.Thread(target=context3.start_consuming, kwargs={'queue_name': 'update_rss'})
+        contexts = [Context(consumer) for consumer in consumers]
 
-        # Start the threads
-        thread1.start()
-        thread2.start()
-        thread3.start()
+        threads = [threading.Thread(target=context.start_consuming, kwargs={'queue_name': queue_name})
+                   for context, queue_name in zip(contexts, queue_names)]
+
+        for thread in threads:
+            thread.start()
