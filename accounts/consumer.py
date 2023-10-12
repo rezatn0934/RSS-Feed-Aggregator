@@ -150,6 +150,25 @@ class UserEventConsumer(EventConsumer):
 
 class UpdateRSSConsumer(EventConsumer):
     def callback(self, ch, method, properties, body):
+        """
+        Callback method to process RSS update events received from RabbitMQ.
+
+        Args:
+            ch: pika.channel.Channel
+                The channel object through which the message was received.
+
+            method: pika.spec.Basic.Deliver
+                Delivery metadata such as delivery tag, redelivered flag, exchange, etc.
+
+            properties: pika.spec.BasicProperties
+                Properties of the message like content type, headers, etc.
+
+            body: bytes
+                The message body in bytes.
+
+        Note:
+            This method will be called by RabbitMQ when a new message is received.
+        """
         print(f"Received event: {self.event_type} for RSS update")
         event_data = json.loads(body)
         data = event_data.get('data')
@@ -169,4 +188,3 @@ class UpdateRSSConsumer(EventConsumer):
 
         notification.save()
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
-
