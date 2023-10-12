@@ -60,6 +60,7 @@ def log_task_info(task_name, level, message, task_id, args, kwargs, retval=' ', 
                   max_retries=' ', retry_eta=' '):
 
     log_data = {
+        'event': f'CeleryTask.{task_name}',
         'level': level,
         'message': message,
         'task_id': task_id,
