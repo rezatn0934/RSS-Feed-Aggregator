@@ -36,6 +36,21 @@ class EventConsumer(ABC):
         self.connection.close()
 
 
+class Context:
+    """
+    The Context defines the interface of interest to clients.
+    """
+
+    def __init__(self, strategy: EventConsumer) -> None:
+        """
+        Initializes a Context instance with a specific event consumer strategy.
+
+        Args:
+            strategy (EventConsumer): The event consumer strategy to be used.
+        """
+        self._strategy = strategy
+
+
 class UserEventConsumer(EventConsumer):
     def callback(self, ch, method, properties, body):
         event_data = json.loads(body)
