@@ -129,7 +129,7 @@ class RefreshToken(APIView):
     def post(self, request):
         refresh_token = request.POST.get("refresh_token").encode("utf-8")
         payload = JWTAuthentication.get_payload_from_refresh_token(refresh_token)
-        JWTAuthentication.validate_refresh_token(payload)
+        JWTAuthentication.validate_token(payload)
 
         user = JWTAuthentication.get_user_from_payload(payload)
         jti = payload["jti"]
