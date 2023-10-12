@@ -1,7 +1,7 @@
 from celery import shared_task, Task
 from accounts.publisher import EventPublisher
 from .utils import parse_data, create_or_update_categories, create_or_update_channel, create_items, log_task_info
-from .models import XmlLink
+from .models import XmlLink, Channel
 
 
 class MyTask(Task):
@@ -58,12 +58,14 @@ def xml_link_creation(self, xml_link):
     }
 
 
-@shared_task(base=MyTask, bind=True, soft_time_limit=900, task_time_limit=1000)
+@shared_task(base=MyTask, bind=True, soft_time_limit=900, task_time_limit=1000, acks_late=True)
 def update_rssfeeds(self):
     xml_links = XmlLink.objects.all()
     for xml_link in xml_links:
-        xml_link_creation.delay(xml_link.xml_link)
-
+        if Channel.objects.filter(xml_link=xml_link).exists():
+            xml_link_creation.delay(xml_link.xml_link)
+        else:
+            xml_link.delete()
     return {
         'status': 'ok',
         'message': f'Task {self.name} completed successfully for {len(xml_links)} XML links'
