@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from accounts.consumer import UserEventConsumer, UpdateRSSConsumer, Context
+from accounts.consumers import UserEventConsumer, UpdateRSSConsumer, Context
 import threading
 
 
