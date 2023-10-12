@@ -58,6 +58,24 @@ class EventConsumer(ABC):
 
     @abstractmethod
     def callback(self, ch, method, properties, body):
+        """
+        Callback method to be implemented by concrete event consumer classes.
+
+        This method will be called when a new message is received in the queue.
+
+        Args:
+            ch: pika.channel.Channel
+                The channel object through which the message was received.
+
+            method: pika.spec.Basic.Deliver
+                Delivery metadata such as delivery tag, redelivered flag, exchange, etc.
+
+            properties: pika.spec.BasicProperties
+                Properties of the message like content type, headers, etc.
+
+            body: bytes
+                The message body in bytes.
+        """
         pass
 
     def close_connection(self):
