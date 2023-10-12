@@ -52,7 +52,7 @@ class UserRegister(APIView):
                 'user_id': user.id,
                 'data': f'{user.username} has been registered successfully using {device_type}'}
 
-            publish_event(event_type='login', queue_name='login', data=data)
+            publish_event(event_type='register', queue_name='register', data=data)
             return Response(ser_data.data, status=status.HTTP_201_CREATED)
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
