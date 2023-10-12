@@ -50,6 +50,16 @@ class Context:
         """
         self._strategy = strategy
 
+    @property
+    def strategy(self) -> EventConsumer:
+        """
+        Gets the current event consumer strategy.
+
+        Returns:
+            EventConsumer: The current event consumer strategy.
+        """
+        return self._strategy
+
 
 class UserEventConsumer(EventConsumer):
     def callback(self, ch, method, properties, body):
