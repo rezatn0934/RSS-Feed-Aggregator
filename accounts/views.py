@@ -204,6 +204,13 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
         if user.check_password(old_password):
             user.set_password(new_pass)
             user.save()
+
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has changed his password using {device_type}'}
+
+            publish_event(event_type='change_pass', queue_name='change_pass', data=data)
             return Response({'status': 'password successfully changed'})
         return Response({'error': 'Your old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
