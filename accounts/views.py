@@ -265,7 +265,7 @@ class ChangePasswordWithToken(APIView):
         Verify token & encoded_pk and then reset the password.
         """
         serializer = self.serializer_class(
-            data=request.data, context={"kwargs": kwargs}
+            data=request.data, context={"kwargs": kwargs, 'request': request}
         )
         serializer.is_valid(raise_exception=True)
         return Response({"message": "Password reset complete"}, status=status.HTTP_200_OK)
