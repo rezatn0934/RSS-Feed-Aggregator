@@ -69,8 +69,8 @@ def log_entry(request, response, exception=None):
     }
     request_line = f"{request.method} {request.get_full_path()} HTTP/1.1"
     status_code = response.status_code if not exception else 500
-    response_size = response.get('Content-Length', ' ')
-    referer = request.META.get('HTTP_REFERER', ' ')
+    response_size = response.get('Content-Length', ' ') if response else ' '
+    referer = request.META.get('HTTP_REFERER', ' ') if response else ' '
     user_agent = request.META.get('HTTP_USER_AGENT', ' ')
     elapsed_time = response.elapsed.total_seconds() if hasattr(response, 'elapsed') else None
     if status_code == 500:
