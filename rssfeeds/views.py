@@ -5,8 +5,9 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+from accounts.authentication import JWTAuthentication
 from .mixins import AuthenticationMixin
-from .serializers import XmlLinkSerializer, ChannelSerializer, PodcastSerializer, NewsSerializer
+from .serializers import ChannelSerializer, PodcastSerializer, NewsSerializer
 from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 
@@ -34,19 +35,17 @@ class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, L
         - GET: AllowAny access for listing News items.
     """
 
-    serializer_class = XmlLinkSerializer
     queryset = XmlLink.objects.all()
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        xml_link = serializer.save()
-        xml_link_creation.delay(xml_link.xml_link)
+        xml_link = request.data.get('xml_link')
+        rss_type = request.data.get('rss_type')
+        obj, created = XmlLink.objects.get_or_create(xml_link=xml_link, rss_type=rss_type)
+        xml_link_creation.delay(obj.xml_link)
         return Response('Your request is processing', status=status.HTTP_201_CREATED)
 
 
-class UpdateRSSFeedsView(APIView):
+class UpdateRSSFeedsView(AuthenticationMixin, APIView):
 
     def get(self, request):
         update_rssfeeds.delay()
@@ -71,7 +70,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     Permissions:
         - GET: AllowAny access for listing Channels.
     """
-
+    authentication_classes = (JWTAuthentication,)
     serializer_class = ChannelSerializer
     queryset = Channel.objects.all()
     filter_backends = [SearchFilter, OrderingFilter]
@@ -84,10 +83,10 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         items = None
         if hasattr(channel, 'podcast_set') and (len(channel.podcast_set.all()) > 0):
             items = channel.podcast_set.all()
-            items_serializer = PodcastSerializer(items, many=True)
+            items_serializer = PodcastSerializer(items, many=True, context={'request': request})
         elif hasattr(channel, 'news_set') and (len(channel.news_set.all()) > 0):
             items = channel.news_set.all()
-            items_serializer = NewsSerializer(items, many=True)
+            items_serializer = NewsSerializer(items, many=True, context={'request': request})
         if items:
             data = {
                 'channel': self.get_serializer(channel).data,

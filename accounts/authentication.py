@@ -20,7 +20,7 @@ class AuthBackend(ModelBackend):
             except user_model.DoesNotExist:
                 return None
 
-        return user if user.check_password(password) else None
+        return user if (user.check_password(password) and user.is_active) else None
 
     def get_user(self, user_id):
         user_model = get_user_model()
@@ -39,20 +39,14 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
     def authenticate(self, request):
 
-        refresh_token = request.data.get("refresh_token")
-        if not refresh_token:
-            return None
-        payload = self.get_payload_from_refresh_token(refresh_token)
-
-        user = self.get_user_from_payload(payload)
-
-        self.validate_refresh_token(payload)
-
         authorization_header = self.get_authorization_header(request)
 
         self.check_prefix(authorization_header)
 
         payload = self.get_payload_from_access_token(authorization_header)
+        self.validate_token(payload)
+
+        user = self.get_user_from_payload(payload)
 
         return user, payload
 
@@ -63,7 +57,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
             return payload
         except jwt.ExpiredSignatureError:
             raise exceptions.PermissionDenied(
-                'Expired refresh token, please login again.')
+                'Expired token, please login again.')
         except Exception as e:
             raise exceptions.NotAcceptable(str(e))
 
@@ -84,11 +78,11 @@ class JWTAuthentication(authentication.BaseAuthentication):
         return user
 
     @staticmethod
-    def validate_refresh_token(payload):
+    def validate_token(payload):
         jti = payload.get('jti')
         if not caches['auth'].keys(jti):
             raise exceptions.PermissionDenied(
-                'Invalid refresh token, please login again.')
+                'Invalid token, please login again.')
 
     def get_authorization_header(self, request):
         authorization_header = request.headers.get(self.authentication_header_name)

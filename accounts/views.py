@@ -1,6 +1,9 @@
-import jwt
 from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import caches
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
@@ -10,11 +13,13 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
-from .utils import generate_access_token, generate_refresh_token, jti_maker, get_random_string, custom_sen_mail
+from .tasks import send_email_task
+from .utils import generate_access_token, generate_refresh_token, jti_maker, custom_sen_mail, publish_event
 from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
     ResetPasswordEmailSerializer, PasswordTokenSerializer
 from .models import User
 from .permisions import UserIsOwner
+from .publishers import EventPublisher
 
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
@@ -41,7 +46,13 @@ class UserRegister(APIView):
     def post(self, request):
         ser_data = UserRegisterSerializer(data=request.POST)
         if ser_data.is_valid():
-            ser_data.create(ser_data.validated_data)
+            user = ser_data.save()
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has been registered successfully using {device_type}'}
+
+            publish_event(event_type='register', queue_name='register', data=data)
             return Response(ser_data.data, status=status.HTTP_201_CREATED)
         return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -71,17 +82,15 @@ class UserLogin(APIView):
         serializer.is_valid(raise_exception=True)
         user_identifier = serializer.validated_data.get('user_identifier')
         password = serializer.validated_data.get('password')
-        new_pass = caches['pass'].get(user_identifier)
-        if password == new_pass:
-            user = User.objects.filter(email=user_identifier)
-            if user:
-                user = user.get()
-                user.set_password(new_pass)
-                user.save()
 
         user = AuthBackend().authenticate(request, username=user_identifier, password=password)
         if user is None:
             return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+        data = {
+            'user_id': user.id,
+            'data': f'{user.username} has logged in successfully using {device_type}'}
+        publish_event(event_type='login', queue_name='login', data=data)
 
         jti = jti_maker()
         access_token = generate_access_token(user.id, jti, access_token_lifetime)
@@ -116,7 +125,9 @@ class RefreshToken(APIView):
 
     def post(self, request):
         refresh_token = request.POST.get("refresh_token").encode("utf-8")
-        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
+        payload = JWTAuthentication.get_payload_from_refresh_token(refresh_token)
+        JWTAuthentication.validate_token(payload)
+
         user = JWTAuthentication.get_user_from_payload(payload)
         jti = payload["jti"]
         caches['auth'].delete(jti)
@@ -157,7 +168,13 @@ class LogoutView(APIView):
             payload = request.auth
             jti = payload["jti"]
             caches['auth'].delete(jti)
+            user = request.user
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has been logout successfully using {device_type}'}
 
+            publish_event(event_type='logout', queue_name='logout', data=data)
             return Response({"message": "Successful Logout"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -167,7 +184,15 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated, UserIsOwner)
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+
+    def get_queryset(self):
+        return User.objects.filter(id=self.request.user.id)
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.first()
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     @action(detail=True, methods=['post'])
     def change_password(self, request, pk=None):
@@ -179,6 +204,13 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
         if user.check_password(old_password):
             user.set_password(new_pass)
             user.save()
+
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has changed his password using {device_type}'}
+
+            publish_event(event_type='change_pass', queue_name='change_pass', data=data)
             return Response({'status': 'password successfully changed'})
         return Response({'error': 'Your old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -194,33 +226,46 @@ class ForgetPassword(APIView):
         email = serializer.validated_data.get('email')
         user = User.objects.filter(email=email)
         if user.exists():
-            token = get_random_string(6)
-            caches['pass'].set(token, email)
-            custom_sen_mail(subject='reset password', message=f'This is your {token}. Use it to change your password',
-                            receiver=user.get().email)
-            return Response({'message': 'Password reset email sent successfully'}, status=status.HTTP_201_CREATED)
+            user = user.get()
+
+            encoded_pk = urlsafe_base64_encode(force_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+
+            reset_url = reverse("accounts:change_password_token", kwargs={"encoded_pk": encoded_pk, "token": token})
+
+            reset_link = f"{request.scheme}://{request.get_host()}{reset_url}"
+            send_email_task.delay(reset_link, email)
+            user = request.user
+            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+            data = {
+                'user_id': user.id,
+                'data': f'{user.username} has requested for forget password using {device_type}'}
+
+            publish_event(event_type='forget_pass', queue_name='forget_pass', data=data)
+            return Response(
+                {
+                    "message":
+                        f"Your password reset password link were emailed"
+                },
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({'message': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "User doesn't exists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class ChangePasswordWithToken(APIView):
     permission_classes = (AllowAny,)
     serializer_class = PasswordTokenSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+    def patch(self, request, *args, **kwargs):
+        """
+        Verify token & encoded_pk and then reset the password.
+        """
+        serializer = self.serializer_class(
+            data=request.data, context={"kwargs": kwargs, 'request': request}
+        )
         serializer.is_valid(raise_exception=True)
-        token = serializer.validated_data['token']
-        new_pass = serializer.validated_data['new_pass']
-        cashed_email = caches['pass'].get(token)
-        if cashed_email:
-            user = User.objects.filter(email=cashed_email)
-            if user.exists():
-                user = user.get()
-                user.set_password(new_pass)
-                user.save()
-                return Response({'status': 'password successfully changed'})
-
-            return Response({'error': "User  doesn't exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({'error': 'Your Token is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Password reset complete"}, status=status.HTTP_200_OK)

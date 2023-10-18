@@ -1,8 +1,33 @@
 services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-alpine
+    networks:
+      - main
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  consumers:
+    container_name: consumers
+    build: .
+    command: python manage.py launch_consumers
+    volumes:
+      - .:/code/
+    networks:
+      - main
+    depends_on:
+      - rabbitmq
+      - app
+    restart: always
 
   postgres:
     container_name: postgres
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=${USER}
@@ -17,12 +42,12 @@ services:
 
   app:
     build: .
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: app
     volumes:
       - .:/code/
     depends_on:
       - postgres
+      - elasticsearch
     ports:
       - 8000:8000
     networks:
@@ -31,7 +56,7 @@ services:
 
   redis:
     container_name: redis
-    image: redis:7.2-alpine
+    image: redis:7.0-alpine
     networks:
       - main
     ports:
@@ -50,7 +75,7 @@ services:
     volumes:
       - .:/code/
     environment:
-      - C_FORCE_ROOT="true"
+      - C_FORCE_ROOT=true
     networks:
       - main
     restart: always
@@ -60,7 +85,7 @@ services:
     build: .
     volumes:
       - .:/code/
-    command: celery -A config beat -l info
+    command: celery -A config beat -l info  #-B read
     depends_on:
       - celery
     networks:
@@ -68,7 +93,6 @@ services:
     restart: always
 
   flower:
-    image: mher/flower:latest
     container_name: flower
     build: .
     command: celery -A config flower
@@ -83,6 +107,34 @@ services:
     volumes:
       - flower_data:/flower_data
 
+  elasticsearch:
+    image: elasticsearch:7.17.3
+    container_name: elasticsearch
+    mem_limit: 512m
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      xpack.security.enabled: 'false'
+    ports:
+      - 9200:9200
+    networks:
+      - main
+    restart: always
+
+  kibana:
+    image: kibana:7.17.3
+    container_name: kibana
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    networks:
+      - main
+    restart: always
+    volumes:
+      - kibana_data:/usr/share/kibana/data
 
 networks:
   main:
@@ -92,4 +144,7 @@ volumes:
   postgres_data_rss:
   redis_data_rss:
   rabbitmq_data:
+  rabbitmq_log:
   flower_data:
+  kibana_data:
+  elasticsearch_data:

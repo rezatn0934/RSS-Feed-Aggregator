@@ -1,10 +1,13 @@
+import json
+import logging
+
 from core.parsers import PodcastParser, NewsParser
 from core.models import Category
 from .models import Podcast, News, Channel
 import requests
 
 
-def parse_podcast_data(xml_link):
+def parse_data(xml_link):
     response = requests.get(xml_link.xml_link)
     [Parser, model] = item_model_mapper(xml_link.rss_type.name)
     return [Parser(response.text).parse_xml_and_create_records(), model]
@@ -48,3 +51,28 @@ def create_items(model, channel, podcast_data):
     podcast_items = (model(channel=channel, **item) for item in podcast_data if
                      not model.objects.filter(guid=item.get("guid")).exists())
     model.objects.bulk_create(podcast_items)
+
+
+logger = logging.getLogger('elastic-logger')
+
+
+def log_task_info(task_name, level, message, task_id, args, kwargs, retval=' ', exception=' ', retry_count=' ',
+                  max_retries=' ', retry_eta=' '):
+
+    log_data = {
+        'event': f'CeleryTask.{task_name}',
+        'level': level,
+        'message': message,
+        'task_id': task_id,
+        'task_name': task_name,
+        'input_data': {
+            'args': args,
+            'kwargs': kwargs
+        },
+        'output_data': retval,
+        'exception': str(exception) if exception else None,
+        'retry_count': retry_count,
+        'max_retries': max_retries,
+        'retry_eta': retry_eta
+    }
+    logger.log(getattr(logging, level.upper()), json.dumps(log_data))

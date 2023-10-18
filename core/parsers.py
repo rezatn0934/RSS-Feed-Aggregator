@@ -2,8 +2,9 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from abc import ABC, abstractmethod
 from .category_node import CategoryNode
+import logging
 
-import requests
+logger = logging.getLogger('elastic-logger')
 
 
 class Parser(ABC):
@@ -178,10 +179,6 @@ class Parser(ABC):
                 items.append(item_data)
 
         sorted_items = sorted(items, key=lambda x: x['pub_date'] if x['pub_date'] else datetime.min)
-        print('2'*100)
-        print(sorted_items)
-        print('1'*100)
-        print(items)
         return {'channel_data': channel_data, 'podcast_data': sorted_items}
 
 
@@ -215,7 +212,7 @@ class PodcastParser(Parser):
         image = self.get_element_attr(item, 'itunes:image', 'href')
         explicit = True if (self.get_element_text(item, 'itunes:explicit')).lower() in ('yes' or 'true') else False
 
-        if audio_file or title or guid:
+        if audio_file or guid:
             return {
                 'title': title,
                 'subtitle': subtitle,
@@ -228,6 +225,7 @@ class PodcastParser(Parser):
                 'explicit': explicit
             }
         else:
+            logger.warning(f"Missing audio_file, or guid for Podcast {title}.")
             return None
 
 
@@ -268,4 +266,5 @@ class NewsParser(Parser):
                 'source': source
             }
         else:
+            logger.warning(f"Missing audio_file, or guid for News {title}.")
             return None

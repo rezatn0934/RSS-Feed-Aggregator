@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middlewares.LoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
@@ -134,23 +135,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_THROTTLE_CLASSES': [
-    #     'rest_framework.throttling.AnonRateThrottle',
-    #     'rest_framework.throttling.UserRateThrottle'
-    # ],
-    # 'DEFAULT_THROTTLE_RATES': {
-    #     'anon': '2/minute',
-    #     'user': '5/minute'
-    # },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'COERCE_DECIMAL_TO_STRING': False,
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'RSS Feed Aggregator API',
     'VERSION': '1.0.0',
 }
+
 JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
@@ -180,15 +175,20 @@ CACHES = {
     },
 }
 
+RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST")
+RABBITMQ_PORT = os.environ.get("RABBITMQ_PORT")
+RABBITMQ_USER = os.environ.get("RABBITMQ_DEFAULT_USER")
+RABBITMQ_PASSWORD = os.environ.get("RABBITMQ_DEFAULT_PASS")
+
 CELERY_TASK_TRACK_STARTED = True
-CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
+CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/'
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
-CELERY_TIME_ZONE = 'UTC'
+CELERY_TIME_ZONE = 'Asi/Tehran'
 
 CELERY_BEAT_SCHEDULE = {
     'update_rssfeeds': {
         'task': 'rssfeeds.tasks.update_rssfeeds',
-        'schedule': crontab(minute=0, hour=0),
+        'schedule': crontab(minute=0, hour=3),
     }
 }
 
@@ -196,30 +196,23 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
 
-    "formatters": {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-        },
-    },
-
     "handlers": {
-        "file": {
+        "elastic_handlers": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "log.log",
-            "formatter": "verbose",
+            "class": "accounts.logger_handlers.ElasticHandler",
         },
     },
 
     "loggers": {
-        "celery-logger": {
-            "handlers": ["file"],
+        "elastic-logger": {
+            "handlers": ["elastic_handlers"],
             "level": "INFO",
-            'propagate': False
+            'propagate': True
         },
-
     },
 }
+ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST')
+ELASTICSEARCH_PORT = os.environ.get('ELASTICSEARCH_PORT')
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
