@@ -10,7 +10,7 @@ from .models import User
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 
-class EventConsumer(ABC):
+class EventConsumer(ABC):  # BaseEventConsumer
     """
     EventConsumer is an abstract base class defining the common structure for event consumers.
     Concrete event consumer classes will extend this and provide their own callback implementations.
@@ -52,7 +52,7 @@ class EventConsumer(ABC):
             queue_name (str): The name of the queue to consume events from.
         """
         self.declare_queue(queue_name=queue_name)
-        self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback, auto_ack=True)
+        self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback)
         self.channel.start_consuming()
 
     @abstractmethod
