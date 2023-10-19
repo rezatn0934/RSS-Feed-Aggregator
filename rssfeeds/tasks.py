@@ -1,4 +1,6 @@
-from celery import shared_task, Task
+from django.utils.translation import gettext_lazy as _
+from celery import shared_task
+
 from accounts.publishers import EventPublisher
 from core.base_task import MyTask
 from .utils import parse_data, create_or_update_categories, create_or_update_channel, create_items, log_task_info
@@ -29,8 +31,8 @@ def xml_link_creation(self, xml_link):
         publisher.close_connection()
 
     return {
-        'status': 'success',
-        'message': f'Task {self.name} completed successfully for XML link: {xml_link}'
+        'status': status,
+        _('message'): f'Task {self.name} completed successfully for XML link: {xml_link}'
     }
 
 
@@ -41,7 +43,7 @@ def update_rssfeeds(self):
         if Channel.objects.filter(xml_link=xml_link).exists():
             xml_link_creation.delay(xml_link.xml_link)
         else:
-            xml_link.delete()
+            xml_link.delete()  # add is_deleted to model
             log_task_info(
                 task_name='update_rssfeeds', level='info',
                 message=f'XML link deleted due to no related channel: {xml_link.xml_link}',
@@ -49,6 +51,6 @@ def update_rssfeeds(self):
             )
 
     return {
-        'status': 'success',
-        'message': f'Task {self.name} completed successfully for {len(xml_links)} XML links'
+        _('status'): _('success'),
+        _('message'): f'Task {self.name} completed successfully for {len(xml_links)} XML links'
     }
