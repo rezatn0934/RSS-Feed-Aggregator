@@ -1,5 +1,7 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_decode
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import serializers
 from .models import User
 from .utils import publish_event
@@ -21,7 +23,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError('Passwords must match!')
+            raise serializers.ValidationError(_('Passwords must match!'))
         return attrs
 
 
@@ -47,7 +49,7 @@ class PasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs['new_pass'] != attrs['new_pass2']:
-            raise serializers.ValidationError('Passwords must match!')
+            raise serializers.ValidationError(_('Passwords must match!'))
         return attrs
 
 
@@ -61,19 +63,19 @@ class PasswordTokenSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs['new_pass'] != attrs['new_pass2']:
-            raise serializers.ValidationError('Passwords must match!')
+            raise serializers.ValidationError(_('Passwords must match!'))
 
         password = attrs.get("new_pass")
         token = self.context.get("kwargs").get("token")
         encoded_pk = self.context.get("kwargs").get("encoded_pk")
 
         if token is None or encoded_pk is None:
-            raise serializers.ValidationError("Missing data.")
+            raise serializers.ValidationError(_("Missing data."))
 
         pk = urlsafe_base64_decode(encoded_pk).decode()
         user = User.objects.get(pk=pk)
         if not PasswordResetTokenGenerator().check_token(user, token):
-            raise serializers.ValidationError("The reset token is invalid")
+            raise serializers.ValidationError(_("The reset token is invalid"))
 
         user.set_password(password)
         user.save()
