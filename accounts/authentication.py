@@ -1,6 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
 from django.core.cache import cache, caches
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import authentication
 from rest_framework import exceptions
@@ -40,6 +41,8 @@ class JWTAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
 
         authorization_header = self.get_authorization_header(request)
+        if not authorization_header:
+            return None
 
         self.check_prefix(authorization_header)
 
@@ -57,7 +60,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
             return payload
         except jwt.ExpiredSignatureError:
             raise exceptions.PermissionDenied(
-                'Expired token, please login again.')
+                _('Expired token, please login again.'))
         except Exception as e:
             raise exceptions.NotAcceptable(str(e))
 
@@ -65,15 +68,15 @@ class JWTAuthentication(authentication.BaseAuthentication):
     def get_user_from_payload(payload):
         user_id = payload.get('user_id')
         if user_id is None:
-            raise exceptions.NotFound('User id not found')
+            raise exceptions.NotFound(_('User id not found'))
 
         try:
             user = user_model.objects.get(id=user_id)
         except:
-            raise exceptions.NotFound('User Not Found')
+            raise exceptions.NotFound(_('User Not Found'))
 
         if not user.is_active:
-            raise exceptions.PermissionDenied('User is inactive')
+            raise exceptions.PermissionDenied(_('User is inactive'))
 
         return user
 
@@ -82,7 +85,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         jti = payload.get('jti')
         if not caches['auth'].keys(jti):
             raise exceptions.PermissionDenied(
-                'Invalid token, please login again.')
+                _('Invalid token, please login again.'))
 
     def get_authorization_header(self, request):
         authorization_header = request.headers.get(self.authentication_header_name)
@@ -93,7 +96,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
     def check_prefix(self, authorization_header):
         prefix = authorization_header.split(' ')[0]
         if prefix != self.authentication_header_prefix:
-            raise exceptions.PermissionDenied('Token prefix missing')
+            raise exceptions.PermissionDenied(_('Token prefix missing'))
 
     @staticmethod
     def get_payload_from_access_token(authorization_header):
@@ -102,7 +105,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
             payload = decode_jwt(access_token)
             return payload
         except jwt.ExpiredSignatureError:
-            raise exceptions.NotAuthenticated('Access token expired')
+            raise exceptions.NotAuthenticated(_('Access token expired'))
         except jwt.InvalidSignatureError as e:
             raise exceptions.NotAcceptable(str(e))
         except:
