@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -54,7 +56,7 @@ class SubscriptionView(GenericAPIView):
         categories = channel.categories.all()
 
         update_recommendations(user=user, categories=categories, increment_count=-1)
-        return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
+        return Response({_('message'): _("Your object has been deleted .")}, status=status.HTTP_200_OK)
 
 
 class RecommendationRetrieveView(APIView):
@@ -69,4 +71,4 @@ class RecommendationRetrieveView(APIView):
             serializer = ChannelSerializer(channels, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": "No recommendations available for this user."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({_("message"): _("No recommendations available for this user.")}, status=status.HTTP_404_NOT_FOUND)
