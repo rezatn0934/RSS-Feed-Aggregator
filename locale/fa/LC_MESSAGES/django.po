@@ -1,0 +1,189 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-19 22:03+0330\n"
+"PO-Revision-Date: 2023-10-19 22:26+0330\n"
+"Last-Translator: None None <rezatn0934@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Translated-Using: django-rosetta 0.9.9\n"
+
+#: accounts/authentication.py:63
+msgid "Expired token, please login again."
+msgstr "رمز منقضی شده، لطفا دوباره وارد شوید."
+
+#: accounts/authentication.py:71
+msgid "User id not found"
+msgstr "شناسه کاربری پیدا نشد."
+
+#: accounts/authentication.py:76
+msgid "User Not Found"
+msgstr "کاربر پیدا نشد."
+
+#: accounts/authentication.py:79
+msgid "User is inactive"
+msgstr "کاربر غیر فعال است."
+
+#: accounts/authentication.py:88
+msgid "Invalid token, please login again."
+msgstr "رمز نامعتبر است، لطفا دوباره وارد شوید."
+
+#: accounts/authentication.py:99
+msgid "Token prefix missing"
+msgstr "پیشوند رمز وجود ندارد."
+
+#: accounts/authentication.py:108
+msgid "Access token expired"
+msgstr "رمز دسترسی منقضی شده است."
+
+#: accounts/manager.py:8
+msgid "Users must have an Email"
+msgstr "کاربران بایدایمیل داشته باشند."
+
+#: accounts/models.py:10
+msgid "Username"
+msgstr "نام کاربری"
+
+#: accounts/models.py:11
+msgid "Email"
+msgstr "ایمیل"
+
+#: accounts/models.py:12
+msgid "First Name"
+msgstr "نام"
+
+#: accounts/models.py:13
+msgid "Last Name"
+msgstr "نام خانوادگی"
+
+#: accounts/models.py:17
+msgid "Joined Date"
+msgstr "تاریخ پیوستن"
+
+#: accounts/models.py:18
+msgid "Last Modify"
+msgstr "تاریخ آخرین تغییرات"
+
+#: accounts/permisions.py:6
+msgid "Permission denied, you do not have permission to perform this action."
+msgstr "مجوز رد شد، شما اجازه انجام این عملیات را ندارید."
+
+#: accounts/serilizers.py:26 accounts/serilizers.py:52
+#: accounts/serilizers.py:66
+msgid "Passwords must match!"
+msgstr "رمز عبور باید مطابقت داشته باشد!"
+
+#: accounts/serilizers.py:73
+msgid "Missing data."
+msgstr "داده وجود ندارد."
+
+#: accounts/serilizers.py:78
+msgid "The reset token is invalid"
+msgstr "رمز بازنشانی نامعتبر است."
+
+#: accounts/views.py:89 accounts/views.py:179 accounts/views.py:181
+#: accounts/views.py:248 accounts/views.py:255 accounts/views.py:272
+#: interactions/views.py:59 interactions/views.py:74 rssfeeds/tasks.py:35
+#: rssfeeds/tasks.py:55 rssfeeds/views.py:100
+msgid "message"
+msgstr "پیام"
+
+#: accounts/views.py:89
+msgid "Invalid Credentials"
+msgstr "گواهی نامه نامعتبر"
+
+#: accounts/views.py:179
+msgid "Successful Logout"
+msgstr "خروج موفق"
+
+#: accounts/views.py:215 rssfeeds/tasks.py:54
+msgid "status"
+msgstr "وضعیت"
+
+#: accounts/views.py:215
+msgid "password successfully changed"
+msgstr "رمز عبور با موفقست تغییر کرد."
+
+#: accounts/views.py:216
+msgid "error"
+msgstr "خطا"
+
+#: accounts/views.py:216
+msgid "Your old password is wrong"
+msgstr "رمز عبور قبلی شما اشتباه است."
+
+#: accounts/views.py:249
+msgid "Your password reset password link were emailed"
+msgstr "لینک رمز عبور بازنشانی شما ایمیل شد."
+
+#: accounts/views.py:255
+msgid "User doesn't exists"
+msgstr "کاربر وجود ندارد."
+
+#: accounts/views.py:272
+msgid "Password reset complete"
+msgstr "بازنشانی رمز عبور کامل شد."
+
+#: config/settings.py:126
+msgid "Persian"
+msgstr "فارسی"
+
+#: config/settings.py:127
+msgid "English"
+msgstr "انگلیسی"
+
+#: interactions/views.py:59
+msgid "Your object has been deleted ."
+msgstr "آبجکت شما حذف شده است."
+
+#: interactions/views.py:74
+msgid "No recommendations available for this user."
+msgstr "هیچ توصیه ای برای این کاربر در دسترس نیست."
+
+#: rssfeeds/tasks.py:35
+#, python-brace-format
+msgid "Task {self.name} completed successfully for XML link: {xml_link}"
+msgstr ""
+
+#: rssfeeds/tasks.py:54
+msgid "success"
+msgstr "موفق"
+
+#: rssfeeds/tasks.py:55
+msgid "Task {self.name} completed successfully for {len(xml_links)} XML links"
+msgstr ""
+
+#: rssfeeds/utils.py:37
+msgid "create"
+msgstr "ساخته شده است"
+
+#: rssfeeds/utils.py:45
+msgid "update"
+msgstr "به روز شده است"
+
+#: rssfeeds/utils.py:47
+msgid "exist"
+msgstr "وجود دارد."
+
+#: rssfeeds/views.py:47
+msgid "Your request is processing"
+msgstr "درخواست شما در حال پردازش است."
+
+#: rssfeeds/views.py:55
+msgid "RSS Feeds have been updated"
+msgstr "فیدهای RSS به روز شده اند"
+
+#: rssfeeds/views.py:100
+msgid "channel has no item"
+msgstr "کانال هیچ آیتمی ندارد"
