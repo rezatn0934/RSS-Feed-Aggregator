@@ -78,7 +78,18 @@ def log_entry(request, response, exception=None):
     else:
         message = str(exception) if exception else 'Request processed successfully'
 
-    event = f"{request.resolver_match.app_names[0]}.{request.resolver_match.url_name}"
+    if request.resolver_match and request.resolver_match.app_names:
+        app_name = request.resolver_match.app_names[0]
+    else:
+        app_name = "unknown_app"
+
+    if request.resolver_match and request.resolver_match.url_name:
+        url_name = request.resolver_match.url_name
+    else:
+        url_name = "unknown_url"
+
+    event = f"{app_name}.{url_name}"
+
     return {
         'remote_host': remote_host,
         'user_info': user_info,
