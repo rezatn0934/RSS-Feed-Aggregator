@@ -4,6 +4,8 @@ from django.core.cache import caches
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
@@ -45,16 +47,15 @@ class UserRegister(APIView):
 
     def post(self, request):
         ser_data = UserRegisterSerializer(data=request.POST)
-        if ser_data.is_valid():
-            user = ser_data.save()
-            device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
-            data = {
-                'user_id': user.id,
-                'data': f'{user.username} has been registered successfully using {device_type}'}
+        ser_data.is_valid(raise_exception=True)
+        user = ser_data.save()
+        device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+        data = {
+            'user_id': user.id,
+            'data': f'{user.username} has been registered successfully using {device_type}'}
 
-            publish_event(event_type='register', queue_name='register', data=data)
-            return Response(ser_data.data, status=status.HTTP_201_CREATED)
-        return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
+        publish_event(event_type='register', queue_name='register', data=data)
+        return Response(ser_data.data, status=status.HTTP_201_CREATED)
 
 
 class UserLogin(APIView):
@@ -85,7 +86,7 @@ class UserLogin(APIView):
 
         user = AuthBackend().authenticate(request, username=user_identifier, password=password)
         if user is None:
-            return Response({'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({_('message'): _('Invalid Credentials')}, status=status.HTTP_400_BAD_REQUEST)
         device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
         data = {
             'user_id': user.id,
@@ -175,9 +176,9 @@ class LogoutView(APIView):
                 'data': f'{user.username} has been logout successfully using {device_type}'}
 
             publish_event(event_type='logout', queue_name='logout', data=data)
-            return Response({"message": "Successful Logout"}, status=status.HTTP_205_RESET_CONTENT)
+            return Response({_("message"): _("Successful Logout")}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({_("message"): str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
@@ -211,8 +212,8 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
                 'data': f'{user.username} has changed his password using {device_type}'}
 
             publish_event(event_type='change_pass', queue_name='change_pass', data=data)
-            return Response({'status': 'password successfully changed'})
-        return Response({'error': 'Your old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({_('status'): _('password successfully changed')})
+        return Response({_('error'): _('Your old password is wrong')}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgetPassword(APIView):
@@ -244,14 +245,14 @@ class ForgetPassword(APIView):
             publish_event(event_type='forget_pass', queue_name='forget_pass', data=data)
             return Response(
                 {
-                    "message":
-                        f"Your password reset password link were emailed"
+                    _("message"):
+                        _("Your password reset password link were emailed")
                 },
                 status=status.HTTP_200_OK,
             )
         else:
             return Response(
-                {"message": "User doesn't exists"},
+                {_("message"): _("User doesn't exists")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -268,4 +269,4 @@ class ChangePasswordWithToken(APIView):
             data=request.data, context={"kwargs": kwargs, 'request': request}
         )
         serializer.is_valid(raise_exception=True)
-        return Response({"message": "Password reset complete"}, status=status.HTTP_200_OK)
+        return Response({_("message"): _("Password reset complete")}, status=status.HTTP_200_OK)
