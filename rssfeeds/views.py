@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
@@ -7,7 +8,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from accounts.authentication import JWTAuthentication
 from .mixins import AuthenticationMixin
-from .serializers import ChannelSerializer, PodcastSerializer, NewsSerializer
+from .serializers import ChannelSerializer, PodcastSerializer, NewsSerializer, XmlLinkSerializer
 from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 
@@ -35,14 +36,15 @@ class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, L
         - GET: AllowAny access for listing News items.
     """
 
+    serializer_class = XmlLinkSerializer
     queryset = XmlLink.objects.all()
 
     def create(self, request, *args, **kwargs):
         xml_link = request.data.get('xml_link')
         rss_type = request.data.get('rss_type')
-        obj, created = XmlLink.objects.get_or_create(xml_link=xml_link, rss_type=rss_type)
+        obj, created = XmlLink.objects.get_or_create(xml_link=xml_link, rss_type_id=rss_type)
         xml_link_creation.delay(obj.xml_link)
-        return Response('Your request is processing', status=status.HTTP_201_CREATED)
+        return Response(_('Your request is processing'), status=status.HTTP_201_CREATED)
 
 
 class UpdateRSSFeedsView(AuthenticationMixin, APIView):
@@ -50,7 +52,7 @@ class UpdateRSSFeedsView(AuthenticationMixin, APIView):
     def get(self, request):
         update_rssfeeds.delay()
 
-        return Response('RSS Feeds have been updated', status=status.HTTP_200_OK)
+        return Response(_('RSS Feeds have been updated'), status=status.HTTP_200_OK)
 
 
 class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -95,7 +97,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
             return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(
-                {'detail': 'channel has no item'},
+                {_('message'): _('channel has no item')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
