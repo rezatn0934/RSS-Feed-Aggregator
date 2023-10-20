@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import sys
 from datetime import timedelta
 from pathlib import Path
-
+from django.utils.translation import gettext_lazy as _
 from celery.schedules import crontab
 from dotenv import load_dotenv
 import os
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_spectacular',
+    'django_celery_beat',
     'accounts',
     'core',
     'interactions',
@@ -183,7 +184,9 @@ RABBITMQ_PASSWORD = os.environ.get("RABBITMQ_DEFAULT_PASS")
 CELERY_TASK_TRACK_STARTED = True
 CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/'
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
-CELERY_TIME_ZONE = 'Asi/Tehran'
+CELERY_TIME_ZONE = 'Asia/Tehran'
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CELERY_BEAT_SCHEDULE = {
     'update_rssfeeds': {
