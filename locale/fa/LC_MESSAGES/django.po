@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-19 22:03+0330\n"
-"PO-Revision-Date: 2023-10-19 22:26+0330\n"
-"Last-Translator: None None <rezatn0934@gmail.com>\n"
+"POT-Creation-Date: 2023-10-22 17:46+0330\n"
+"PO-Revision-Date: 2023-10-22 17:48+0330\n"
+"Last-Translator: None None <admin@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -19,31 +19,31 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Translated-Using: django-rosetta 0.9.9\n"
 
-#: accounts/authentication.py:63
+#: accounts/authentication.py:140
 msgid "Expired token, please login again."
 msgstr "رمز منقضی شده، لطفا دوباره وارد شوید."
 
-#: accounts/authentication.py:71
+#: accounts/authentication.py:148
 msgid "User id not found"
 msgstr "شناسه کاربری پیدا نشد."
 
-#: accounts/authentication.py:76
+#: accounts/authentication.py:153
 msgid "User Not Found"
 msgstr "کاربر پیدا نشد."
 
-#: accounts/authentication.py:79
+#: accounts/authentication.py:156
 msgid "User is inactive"
 msgstr "کاربر غیر فعال است."
 
-#: accounts/authentication.py:88
+#: accounts/authentication.py:165
 msgid "Invalid token, please login again."
 msgstr "رمز نامعتبر است، لطفا دوباره وارد شوید."
 
-#: accounts/authentication.py:99
+#: accounts/authentication.py:176
 msgid "Token prefix missing"
 msgstr "پیشوند رمز وجود ندارد."
 
-#: accounts/authentication.py:108
+#: accounts/authentication.py:185
 msgid "Access token expired"
 msgstr "رمز دسترسی منقضی شده است."
 
@@ -79,23 +79,20 @@ msgstr "تاریخ آخرین تغییرات"
 msgid "Permission denied, you do not have permission to perform this action."
 msgstr "مجوز رد شد، شما اجازه انجام این عملیات را ندارید."
 
-#: accounts/serilizers.py:26 accounts/serilizers.py:52
-#: accounts/serilizers.py:66
+#: accounts/serilizers.py:29 accounts/serilizers.py:55
+#: accounts/serilizers.py:65
 msgid "Passwords must match!"
 msgstr "رمز عبور باید مطابقت داشته باشد!"
 
-#: accounts/serilizers.py:73
+#: accounts/serilizers.py:70
 msgid "Missing data."
 msgstr "داده وجود ندارد."
 
-#: accounts/serilizers.py:78
+#: accounts/serilizers.py:75
 msgid "The reset token is invalid"
 msgstr "رمز بازنشانی نامعتبر است."
 
-#: accounts/views.py:89 accounts/views.py:179 accounts/views.py:181
-#: accounts/views.py:248 accounts/views.py:255 accounts/views.py:272
-#: interactions/views.py:59 interactions/views.py:74 rssfeeds/tasks.py:35
-#: rssfeeds/tasks.py:55 rssfeeds/views.py:100
+#: accounts/views.py:89
 msgid "message"
 msgstr "پیام"
 
@@ -103,87 +100,105 @@ msgstr "پیام"
 msgid "Invalid Credentials"
 msgstr "گواهی نامه نامعتبر"
 
-#: accounts/views.py:179
+#: accounts/views.py:178
 msgid "Successful Logout"
 msgstr "خروج موفق"
 
-#: accounts/views.py:215 rssfeeds/tasks.py:54
-msgid "status"
-msgstr "وضعیت"
-
-#: accounts/views.py:215
+#: accounts/views.py:253
 msgid "password successfully changed"
 msgstr "رمز عبور با موفقست تغییر کرد."
 
-#: accounts/views.py:216
-msgid "error"
-msgstr "خطا"
-
-#: accounts/views.py:216
+#: accounts/views.py:254
 msgid "Your old password is wrong"
 msgstr "رمز عبور قبلی شما اشتباه است."
 
-#: accounts/views.py:249
+#: accounts/views.py:297
 msgid "Your password reset password link were emailed"
 msgstr "لینک رمز عبور بازنشانی شما ایمیل شد."
 
-#: accounts/views.py:255
+#: accounts/views.py:303
 msgid "User doesn't exists"
 msgstr "کاربر وجود ندارد."
 
-#: accounts/views.py:272
-msgid "Password reset complete"
-msgstr "بازنشانی رمز عبور کامل شد."
-
-#: config/settings.py:126
+#: config/settings.py:128
 msgid "Persian"
 msgstr "فارسی"
 
-#: config/settings.py:127
+#: config/settings.py:129
 msgid "English"
 msgstr "انگلیسی"
 
-#: interactions/views.py:59
-msgid "Your object has been deleted ."
+#: interactions/mixins.py:42
+msgid "You've already interacted with this item."
+msgstr "شما در حال حاضر با این آیتم تعامل دارید."
+
+#: interactions/mixins.py:47
+msgid "Your interact successfully ."
+msgstr "شما با موفقیت تعامل کردید."
+
+#: interactions/mixins.py:66
+msgid "Your interaction has been removed ."
 msgstr "آبجکت شما حذف شده است."
 
+#: interactions/mixins.py:68
+msgid "You haven't interacted with this item."
+msgstr "شما با این آیتم تعامل نداشته اید."
+
+#: interactions/views.py:48
+msgid "Subscription already exists."
+msgstr "اشتراک از قبل وجود دارد."
+
+#: interactions/views.py:60
+msgid "Missing channel_id in request body."
+msgstr "شناسه کانال در بدنه درخواست وجود ندارد."
+
+#: interactions/views.py:65
+#| msgid "User doesn't exists"
+msgid "Subscription does not exist."
+msgstr "اشتراک وجود ندارد."
+
 #: interactions/views.py:74
+#, fuzzy
+#| msgid "Your object has been deleted ."
+msgid "Your object has been deleted."
+msgstr "آبجکت شما حذف شده است."
+
+#: interactions/views.py:97
 msgid "No recommendations available for this user."
 msgstr "هیچ توصیه ای برای این کاربر در دسترس نیست."
-
-#: rssfeeds/tasks.py:35
-#, python-brace-format
-msgid "Task {self.name} completed successfully for XML link: {xml_link}"
-msgstr ""
 
 #: rssfeeds/tasks.py:54
 msgid "success"
 msgstr "موفق"
 
-#: rssfeeds/tasks.py:55
-msgid "Task {self.name} completed successfully for {len(xml_links)} XML links"
-msgstr ""
-
-#: rssfeeds/utils.py:37
-msgid "create"
-msgstr "ساخته شده است"
-
-#: rssfeeds/utils.py:45
-msgid "update"
-msgstr "به روز شده است"
-
-#: rssfeeds/utils.py:47
-msgid "exist"
-msgstr "وجود دارد."
-
-#: rssfeeds/views.py:47
+#: rssfeeds/views.py:58
 msgid "Your request is processing"
 msgstr "درخواست شما در حال پردازش است."
 
-#: rssfeeds/views.py:55
+#: rssfeeds/views.py:66
 msgid "RSS Feeds have been updated"
 msgstr "فیدهای RSS به روز شده اند"
 
-#: rssfeeds/views.py:100
+#: rssfeeds/views.py:111
 msgid "channel has no item"
 msgstr "کانال هیچ آیتمی ندارد"
+
+#, fuzzy
+#~ msgid "created"
+#~ msgstr "ساخته شده است"
+
+#, fuzzy
+#~ msgid "updated"
+#~ msgstr "به روز شده است"
+
+#~ msgid "exist"
+#~ msgstr "وجود دارد."
+
+#~ msgid "status"
+#~ msgstr "وضعیت"
+
+#~ msgid "error"
+#~ msgstr "خطا"
+
+#~ msgid "Password reset complete"
+#~ msgstr "بازنشانی رمز عبور کامل شد."
