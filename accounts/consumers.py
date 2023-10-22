@@ -168,8 +168,7 @@ class UserEventConsumer(EventConsumer):
             notification.recipients.add(user)
 
             notification.save()
-
-        ActivityLog.objects.update_or_create(actor=user, action_type=self.event_type, remark=message)
+        ActivityLog.objects.update_or_create(user=user, action_type=self.event_type, remarks=message)
 
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
         print(f"Received event: {self.event_type} for user: {user.username}")
@@ -207,15 +206,16 @@ class UpdateRSSConsumer(EventConsumer):
         message = data['data']
         subscribers = Subscription.objects.filter(channel=Channel.objects.get(id=channel_id))
 
-        notification = Notification.objects.create(
-            title=self.event_type,
-            notification_type='info',
-            message=message
-        )
+        if subscribers.exists():
+            notification = Notification.objects.create(
+                title=self.event_type,
+                notification_type='info',
+                message=message
+            )
 
-        for subscriber in subscribers:
-            user = User.objects.get(id=subscriber.user_id)
-            notification.recipients.add(user)
+            for subscriber in subscribers:
+                user = User.objects.get(id=subscriber.user_id)
+                notification.recipients.add(user)
 
-        notification.save()
+            notification.save()
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
