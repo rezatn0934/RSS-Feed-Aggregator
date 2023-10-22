@@ -181,6 +181,45 @@ class LogoutView(APIView):
 
 
 class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
+    """
+    View for user profile details with retrieval, update, deletion, and password change capabilities.
+
+    This view provides the following actions for managing user profiles:
+    - Retrieve: View the user's profile details.
+    - Update: Modify the user's profile information.
+    - Destroy: Delete the user's account.
+    - Change Password: Change the user's password.
+
+    Permissions:
+    - IsAuthenticated: Users must be authenticated with a valid access token.
+    - UserIsOwner: Users are only allowed to access their own profile.
+
+    Serializer:
+    - UserSerializer: Used for viewing and updating the user's profile information.
+
+    Actions:
+    - Change Password: An additional custom action to change the user's password.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        Response: A JSON response indicating the result of the requested action along with the appropriate status code.
+
+    Example Usage:
+    - Retrieve Profile: GET /api/user-profile/
+    - Update Profile: PUT /api/user-profile/
+    - Delete Account: DELETE /api/user-profile/
+    - Change Password: POST /api/user-profile/change-password/
+
+    Note:
+    - The "Change Password" action requires the following data:
+      - old_password (str): The user's current password.
+      - new_pass (str): The desired new password.
+
+    See the API documentation for more details on each action and its usage.
+    """
+
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated, UserIsOwner)
     serializer_class = UserSerializer
@@ -216,6 +255,21 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
 
 
 class ForgetPassword(APIView):
+    """
+    Request a password reset link by providing the user's email.
+
+    Endpoint: POST /api/auth/forget-password/
+    Permission: AllowAny (open to all users)
+
+    This view allows users to request a password reset link by providing their email address.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the user's email.
+
+    Returns:
+        Response: A JSON response indicating the result of the password reset link request.
+    """
+
     permission_classes = (AllowAny,)
     serializer_class = ResetPasswordEmailSerializer
 
@@ -252,13 +306,38 @@ class ForgetPassword(APIView):
 
 
 class ChangePasswordWithToken(TokenVerificationMixin, APIView):
+    """
+    Change the user's password using a valid token.
+
+    Permission: AllowAny (open to all users)
+
+    This view allows users to change their password by providing a valid token.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the user's new password and token.
+
+    Returns:
+        Response: A JSON response indicating the result of the password change.
+    """
 
     serializer_class = PasswordTokenSerializer
     success_message = "Password reset complete"
 
 
 class ActivateUserWithToken(TokenVerificationMixin, APIView):
+    """
+    Activate a user's account using a valid token.
 
+    Permission: AllowAny (open to all users)
+
+    This view allows users to activate their account by providing a valid token.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the activation token.
+
+    Returns:
+        Response: A JSON response indicating the result of the account activation.
+    """
 
     serializer_class = ActiveUserSerializer
     success_message = "User has been activated successfully"
