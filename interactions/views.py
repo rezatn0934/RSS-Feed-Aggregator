@@ -55,13 +55,23 @@ class SubscriptionView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
-        subscription = self.get_object()
+        channel_id = request.data.get('channel_id')
+        if channel_id is None:
+            return Response({'message': _("Missing channel_id in request body.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription = Subscription.objects.get(user=request.user, channel_id=channel_id)
+        except Subscription.DoesNotExist:
+            return Response({'message': _("Subscription does not exist.")}, status=status.HTTP_404_NOT_FOUND)
+
         channel = subscription.channel
         user = request.user
-        categories = channel.categories.all()
+        categories = channel.category.all()
 
         update_recommendations(user=user, categories=categories, increment_count=-1)
-        return Response({_('message'): _("Your object has been deleted .")}, status=status.HTTP_200_OK)
+
+        subscription.delete()
+        return Response({'message': _("Your object has been deleted.")}, status=status.HTTP_200_OK)
 
 
 class RecommendationRetrieveView(APIView):
