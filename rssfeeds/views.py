@@ -1,4 +1,5 @@
 from django.utils.translation import gettext_lazy as _
+
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
@@ -8,7 +9,32 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from accounts.authentication import JWTAuthentication
 from .mixins import AuthenticationMixin
-from .serializers import ChannelSerializer, PodcastSerializer, NewsSerializer, XmlLinkSerializer
+from .serializers import (
+    ChannelSerializer,
+    NewsSerializer,
+    XmlLinkSerializer,
+)
+from django_elasticsearch_dsl_drf.constants import (
+    LOOKUP_FILTER_RANGE,
+    LOOKUP_QUERY_IN,
+    LOOKUP_QUERY_GT,
+    LOOKUP_QUERY_GTE,
+    LOOKUP_QUERY_LT,
+    LOOKUP_QUERY_LTE,
+    LOOKUP_QUERY_CONTAINS,
+)
+from django_elasticsearch_dsl_drf.filter_backends import (
+    FilteringFilterBackend,
+    IdsFilterBackend,
+    OrderingFilterBackend,
+    DefaultOrderingFilterBackend,
+    SearchFilterBackend,
+)
+from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
+
+from .documents import PodcastDocument
+from .serializers import PodcastSerializer, PodcastDocumentSerializer
+
 from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
 
@@ -44,7 +70,7 @@ class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, L
         rss_type = request.data.get('rss_type')
         obj, created = XmlLink.objects.get_or_create(xml_link=xml_link, rss_type_id=rss_type)
         xml_link_creation.delay(obj.xml_link)
-        return Response(_('Your request is processing'), status=status.HTTP_201_CREATED)
+        return Response({'message': _('Your request is processing')}, status=status.HTTP_201_CREATED)
 
 
 class UpdateRSSFeedsView(AuthenticationMixin, APIView):
@@ -52,7 +78,7 @@ class UpdateRSSFeedsView(AuthenticationMixin, APIView):
     def get(self, request):
         update_rssfeeds.delay()
 
-        return Response(_('RSS Feeds have been updated'), status=status.HTTP_200_OK)
+        return Response({'message': _('RSS Feeds have been updated')}, status=status.HTTP_200_OK)
 
 
 class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -97,7 +123,7 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
             return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(
-                {_('message'): _('channel has no item')},
+                {'message': _('channel has no item')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -152,3 +178,55 @@ class NewsViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, Retr
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'pub_Date']
     ordering_fields = ['id', 'title', 'pub_Date']
+
+
+class PodcastDocumentView(BaseDocumentViewSet):
+    """The BookDocument view."""
+
+    document = PodcastDocument
+    serializer_class = PodcastDocumentSerializer
+    lookup_field = 'id'
+    filter_backends = [
+        FilteringFilterBackend,
+        IdsFilterBackend,
+        OrderingFilterBackend,
+        DefaultOrderingFilterBackend,
+        SearchFilterBackend,
+    ]
+
+    search_fields = (
+        'subtitle',
+        'title',
+        'description',
+        'channel.title',
+    )
+
+    filter_fields = {
+        'id': {
+            'field': '_id',
+            'lookups': [
+                LOOKUP_FILTER_RANGE,
+                LOOKUP_QUERY_IN,
+                LOOKUP_QUERY_GT,
+                LOOKUP_QUERY_GTE,
+                LOOKUP_QUERY_LT,
+                LOOKUP_QUERY_LTE,
+                LOOKUP_QUERY_CONTAINS,
+            ],
+        },
+        'title': 'title.raw',
+        'pub_date': 'pub_date',
+        'channel': 'channel.title.raw',
+        'subtitle': 'subtitle.raw',
+        'description': 'description.raw',
+        'explicit': 'explicit'
+    }
+
+    ordering_fields = {
+        'id': 'id',
+        'title': 'title.raw',
+        'channel': 'channel.title.raw',
+        'pub_date': 'pub_date',
+    }
+
+    ordering = ('id', 'title', 'pub_date')
