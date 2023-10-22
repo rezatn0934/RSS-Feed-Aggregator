@@ -87,3 +87,26 @@ class ChannelDocument(Document):
             },
         }
 
+
+@registry.register_document
+class PodcastDocument(BaseDocument):
+    class Index(BaseDocument.Index):
+        name = 'podcast_index'
+
+    subtitle = fields.TextField(
+        fields={'raw': fields.KeywordField()},
+        analyzer='standard',
+    )
+    description = fields.TextField(
+        fields={'raw': fields.KeywordField()},
+        analyzer='standard', )
+    duration = fields.KeywordField()
+    audio_file = fields.KeywordField()
+    explicit = fields.BooleanField(
+        attr='explicit',
+        analyzer='standard',
+    )
+
+    class Django:
+        model = Podcast
+
