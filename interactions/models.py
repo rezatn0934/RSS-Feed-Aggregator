@@ -13,7 +13,7 @@ class Like(models.Model):
     content_object = GenericForeignKey()
 
     def __str__(self):
-        return f'liked by: {self.user}'
+        return f'{self.user} liked {self.content_type}'
 
 
 class Comment(models.Model):
@@ -25,7 +25,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'commented by: {self.user}'
+        return f'Commented by: {self.user} on {self.content_object}'
 
 
 class Subscription(models.Model):
@@ -74,7 +74,8 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Notification: {self.title}'
+        recipient_usernames = ", ".join(recipient.username for recipient in self.recipients.all())
+        return f'Notification to {recipient_usernames}: {self.title}'
 
 
 class ActivityLog(models.Model):
@@ -84,4 +85,4 @@ class ActivityLog(models.Model):
     remarks = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.action_type} by {self.actor} on {self.action_time}"
+        return f"{self.action_type} by {self.user} on {self.action_time}"
