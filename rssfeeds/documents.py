@@ -29,6 +29,8 @@ class BaseDocument(DocType):
     class Django:
         model = None
 
+    def get_queryset(self):
+        return super().get_queryset().select_related('channel')
 
 
 @registry.register_document
