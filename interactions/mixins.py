@@ -1,4 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -37,12 +39,12 @@ class InteractionMixin:
         )
 
         if not created:
-            return Response({'message': f"You've already interacted with this item."},
+            return Response({'message': _("You've already interacted with this item.")},
                             status=status.HTTP_400_BAD_REQUEST)
 
         categories = channel.category.all()
         update_recommendations(user=request.user, categories=categories, increment_count=1)
-        return Response({'message': f"Your object has been created successfully ."}, status=status.HTTP_200_OK)
+        return Response({'message': _("Your interact successfully .")}, status=status.HTTP_200_OK)
 
     def delete_object(self, request, model):
         channel_id = request.data.get('channel_id')
@@ -61,6 +63,6 @@ class InteractionMixin:
             interaction.delete()
             categories = channel.category.all()
             update_recommendations(user=request.user, categories=categories, increment_count=-1)
-            return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
+            return Response({'message': _("Your interaction has been removed .")}, status=status.HTTP_200_OK)
         except model.DoesNotExist:
-            return Response({'message': "You haven't interacted with this item."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': _("You haven't interacted with this item.")}, status=status.HTTP_400_BAD_REQUEST)
