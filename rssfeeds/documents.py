@@ -48,3 +48,12 @@ class ChannelDocument(Document):
         return {
             'name': instance.category.name,
         }
+
+    def prepare_xml_link(self, instance):
+        return {
+            'xml_link': instance.xml_link.xml_link,
+            'rss_type': {
+                'name': instance.xml_link.rss_type.name,
+            },
+        }
+
