@@ -34,7 +34,7 @@ def create_or_update_categories(categories_data):
 
 
 def create_or_update_channel(xml_link, channel_data):
-    status = _('created')
+    status = 'created'
     channel, created = Channel.objects.get_or_create(xml_link=xml_link, defaults=channel_data)
     last_update = channel_data.get('last_update')
     if not created:
@@ -42,9 +42,9 @@ def create_or_update_channel(xml_link, channel_data):
             for key, value in channel_data.items():
                 setattr(channel, key, value)
             channel.save()
-            status = _('updated')
+            status = 'updated'
         else:
-            status = _('exist')
+            status = 'exist'
     return channel, status
 
 
