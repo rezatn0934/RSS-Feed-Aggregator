@@ -6,6 +6,25 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 
+class BaseDocument(DocType):
+
+    id = fields.IntegerField(attr='id')
+    title = fields.TextField(
+        fields={'raw': fields.KeywordField()},
+        analyzer='standard',
+    )
+    channel = fields.ObjectField(properties={
+        'title': fields.TextField(fields={'raw': fields.KeywordField()},
+                                  analyzer='standard', ),
+        'last_update': fields.DateField(),
+    })
+    pub_date = fields.DateField()
+
+    class Django:
+        model = None
+
+
+
 @registry.register_document
 class ChannelDocument(Document):
     class Index:
