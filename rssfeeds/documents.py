@@ -8,6 +8,12 @@ from django_elasticsearch_dsl.registries import registry
 
 @registry.register_document
 class ChannelDocument(Document):
+    class Index:
+        name = 'channel_index'
+        settings = {
+            'number_of_shards': 1,
+            'number_of_replicas': 0,
+        }
 
     title = fields.TextField(
         fields={'raw': fields.KeywordField()},
