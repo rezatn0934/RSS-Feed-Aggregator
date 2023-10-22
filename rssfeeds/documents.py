@@ -41,3 +41,5 @@ class ChannelDocument(Document):
     class Django:
         model = Channel
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('xml_link__rss_type', 'category')
