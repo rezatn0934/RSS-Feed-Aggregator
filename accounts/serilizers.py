@@ -108,3 +108,23 @@ class PasswordTokenSerializer(serializers.Serializer):
         publish_reset_password_event(user, request)
 
         return attrs
+
+
+class ActiveUserSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        token = self.context.get("kwargs").get("token")
+        encoded_pk = self.context.get("kwargs").get("encoded_pk")
+
+        pk = urlsafe_base64_decode(encoded_pk).decode()
+        user = User.objects.get(pk=pk)
+
+        validate_token_and_encoded_pk(token, encoded_pk)
+        validate_token(user, token)
+
+        user.is_active = True
+        user.save()
+
+        request = self.context.get('request')
+        publish_reset_password_event(user, request)
+
+        return attrs
