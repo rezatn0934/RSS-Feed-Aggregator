@@ -1,9 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import caches
-from django.urls import reverse
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import status
@@ -15,13 +11,13 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from .authentication import AuthBackend, JWTAuthentication
+from .mixins import TokenVerificationMixin
 from .tasks import send_email_task
-from .utils import generate_access_token, generate_refresh_token, jti_maker, custom_sen_mail, publish_event
+from .utils import generate_access_token, generate_refresh_token, jti_maker, publish_event, generate_link
 from .serilizers import UserRegisterSerializer, UserLoginSerializer, UserSerializer, PasswordSerializer, \
-    ResetPasswordEmailSerializer, PasswordTokenSerializer
+    ResetPasswordEmailSerializer, PasswordTokenSerializer, ActiveUserSerializer
 from .models import User
 from .permisions import UserIsOwner
-from .publishers import EventPublisher
 
 access_token_lifetime = settings.JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_token_lifetime = settings.JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
@@ -43,12 +39,16 @@ class UserRegister(APIView):
         Response: A JSON response indicating success or failure along with appropriate status codes.
     """
 
+
     permission_classes = (AllowAny,)
 
     def post(self, request):
         ser_data = UserRegisterSerializer(data=request.POST)
         ser_data.is_valid(raise_exception=True)
         user = ser_data.save()
+        active_link = generate_link(request=request, user=user, view_name='accounts:activate-user')
+        send_email_task.delay(active_link, user.email)
+
         device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
         data = {
             'user_id': user.id,
@@ -121,7 +121,6 @@ class RefreshToken(APIView):
     Returns:
         Response: A JSON response containing new access and refresh tokens along with appropriate status codes.
     """
-
     permission_classes = []
 
     def post(self, request):
@@ -176,9 +175,9 @@ class LogoutView(APIView):
                 'data': f'{user.username} has been logout successfully using {device_type}'}
 
             publish_event(event_type='logout', queue_name='logout', data=data)
-            return Response({_("message"): _("Successful Logout")}, status=status.HTTP_205_RESET_CONTENT)
+            return Response({"message": _("Successful Logout")}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
-            return Response({_("message"): str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
@@ -196,7 +195,7 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
         return obj
 
     @action(detail=True, methods=['post'])
-    def change_password(self, request, pk=None):
+    def change_password(self, request):
         user = self.get_object()
         serializer = PasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -212,8 +211,8 @@ class UserProfileDetailView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
                 'data': f'{user.username} has changed his password using {device_type}'}
 
             publish_event(event_type='change_pass', queue_name='change_pass', data=data)
-            return Response({_('status'): _('password successfully changed')})
-        return Response({_('error'): _('Your old password is wrong')}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': _('password successfully changed')})
+        return Response({'error': _('Your old password is wrong')}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgetPassword(APIView):
@@ -228,13 +227,8 @@ class ForgetPassword(APIView):
         user = User.objects.filter(email=email)
         if user.exists():
             user = user.get()
+            reset_link = generate_link(request=request, user=user, view_name='accounts:change_password_token')
 
-            encoded_pk = urlsafe_base64_encode(force_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
-
-            reset_url = reverse("accounts:change_password_token", kwargs={"encoded_pk": encoded_pk, "token": token})
-
-            reset_link = f"{request.scheme}://{request.get_host()}{reset_url}"
             send_email_task.delay(reset_link, email)
             user = request.user
             device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
@@ -245,28 +239,26 @@ class ForgetPassword(APIView):
             publish_event(event_type='forget_pass', queue_name='forget_pass', data=data)
             return Response(
                 {
-                    _("message"):
+                    "message":
                         _("Your password reset password link were emailed")
                 },
                 status=status.HTTP_200_OK,
             )
         else:
             return Response(
-                {_("message"): _("User doesn't exists")},
+                {"message": _("User doesn't exists")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
 
-class ChangePasswordWithToken(APIView):
-    permission_classes = (AllowAny,)
-    serializer_class = PasswordTokenSerializer
+class ChangePasswordWithToken(TokenVerificationMixin, APIView):
 
-    def patch(self, request, *args, **kwargs):
-        """
-        Verify token & encoded_pk and then reset the password.
-        """
-        serializer = self.serializer_class(
-            data=request.data, context={"kwargs": kwargs, 'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        return Response({_("message"): _("Password reset complete")}, status=status.HTTP_200_OK)
+    serializer_class = PasswordTokenSerializer
+    success_message = "Password reset complete"
+
+
+class ActivateUserWithToken(TokenVerificationMixin, APIView):
+
+
+    serializer_class = ActiveUserSerializer
+    success_message = "User has been activated successfully"
