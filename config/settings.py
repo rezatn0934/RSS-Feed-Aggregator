@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
     'drf_spectacular',
     'django_celery_beat',
     'rosetta',
@@ -223,6 +225,11 @@ LOGGING = {
 }
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST')
 ELASTICSEARCH_PORT = os.environ.get('ELASTICSEARCH_PORT')
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': f'http://{ELASTICSEARCH_HOST}:{ELASTICSEARCH_PORT}'
+    },
+}
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
