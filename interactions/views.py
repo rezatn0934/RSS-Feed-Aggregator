@@ -1,3 +1,5 @@
+from django.db import IntegrityError
+from django.db.models import Subquery
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import status
@@ -40,7 +42,10 @@ class SubscriptionView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            serializer.save()
+        except IntegrityError as e:
+            return Response({'message': _("Subscription already exists.")}, status=status.HTTP_400_BAD_REQUEST)
 
         channel = serializer.validated_data['channel']
         user = request.user
