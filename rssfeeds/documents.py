@@ -32,6 +32,9 @@ class BaseDocument(DocType):
     def get_queryset(self):
         return super().get_queryset().select_related('channel')
 
+    def prepare_channel(self, instance):
+        return {'title': instance.channel.title, 'last_update': instance.channel.last_update}
+
 
 @registry.register_document
 class ChannelDocument(Document):
