@@ -110,3 +110,14 @@ class PodcastDocument(BaseDocument):
     class Django:
         model = Podcast
 
+
+@registry.register_document
+class NewsDocument(BaseDocument):
+    class Index(BaseDocument.Index):
+        name = 'news_index'
+
+    source = fields.KeywordField()
+    link = fields.KeywordField()
+
+    class Django:
+        model = News
