@@ -32,7 +32,7 @@ def xml_link_creation(self, xml_link):
 
     return {
         'status': status,
-        _('message'): f'Task {self.name} completed successfully for XML link: {xml_link}'
+        'message': f'Task {self.name} completed successfully for XML link: {xml_link}'
     }
 
 
@@ -51,6 +51,6 @@ def update_rssfeeds(self):
             )
 
     return {
-        _('status'): _('success'),
-        _('message'): f'Task {self.name} completed successfully for {len(xml_links)} XML links'
+        'status': _('success'),
+        'message': f'Task {self.name} completed successfully for {len(xml_links)} XML links'
     }
