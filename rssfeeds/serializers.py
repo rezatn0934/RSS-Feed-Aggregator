@@ -1,6 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
+
+from .documents import PodcastDocument
 from interactions.models import Like, BookMark, Comment, Subscription
 from interactions.serializers import CommentSerializer
 from .models import XmlLink, Channel, Podcast, News
@@ -83,3 +86,17 @@ class NewsSerializer(BaseItemSerializer):
     class Meta(BaseItemSerializer.Meta):
         model = News
         fields = BaseItemSerializer.Meta.fields + ['source', 'link']
+
+
+class PodcastDocumentSerializer(DocumentSerializer):
+    class Meta:
+        document = PodcastDocument
+        fields = (
+            'id',
+            'title',
+            'channel',
+            'description',
+            'pub_date',
+            'subtitle',
+            'explicit',
+        )
