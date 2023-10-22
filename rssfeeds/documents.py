@@ -43,3 +43,8 @@ class ChannelDocument(Document):
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('xml_link__rss_type', 'category')
+
+    def prepare_category(self, instance):
+        return {
+            'name': instance.category.name,
+        }
