@@ -95,8 +95,21 @@ class PodcastDocumentSerializer(DocumentSerializer):
             'id',
             'title',
             'channel',
+            'guid',
             'description',
             'pub_date',
             'subtitle',
             'explicit',
+        )
+
+
+class NewsDocumentSerializer(DocumentSerializer):
+    class Meta:
+        document = PodcastDocument
+        fields = (
+            'id',
+            'title',
+            'channel',
+            'guid',
+            'pub_date',
         )
