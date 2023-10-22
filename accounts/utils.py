@@ -6,8 +6,11 @@ import jwt
 from django.conf import settings
 from uuid import uuid4
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
-
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from accounts.publishers import EventPublisher
 
 
@@ -60,18 +63,18 @@ def custom_sen_mail(subject, message, receiver):
 
 
 def log_entry(request, response, exception=None):
-    remote_host = request.META.get('REMOTE_ADDR', ' ')
-    user_id = request.user.id if request.user.is_authenticated else ' '
+    remote_host = request.META.get('REMOTE_ADDR', '')
+    user_id = request.user.id if request.user.is_authenticated else ''
     user_info = {
         'user_id': user_id,
-        'user_username': request.user.username if request.user.is_authenticated else ' ',
-        'user_email': request.user.email if request.user.is_authenticated else ' ',
+        'user_username': request.user.username if request.user.is_authenticated else '',
+        'user_email': request.user.email if request.user.is_authenticated else '',
     }
     request_line = f"{request.method} {request.get_full_path()} HTTP/1.1"
     status_code = response.status_code if not exception else 500
-    response_size = response.get('Content-Length', ' ') if response else ' '
-    referer = request.META.get('HTTP_REFERER', ' ') if response else ' '
-    user_agent = request.META.get('HTTP_USER_AGENT', ' ')
+    response_size = response.get('Content-Length', '') if response else ''
+    referer = request.META.get('HTTP_REFERER', '') if response else ''
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
     elapsed_time = response.elapsed.total_seconds() if hasattr(response, 'elapsed') else None
     if status_code == 500:
         message = 'Internal Server Error: An unexpected error occurred while processing the request.'
@@ -108,3 +111,13 @@ def publish_event(event_type, queue_name, data):
     publisher = EventPublisher()
     publisher.publish_event(queue_name=queue_name, event_type=event_type, data=data)
     publisher.close_connection()
+
+
+def generate_link(request, user, view_name):
+    encoded_pk = urlsafe_base64_encode(force_bytes(user.id))
+    token = PasswordResetTokenGenerator().make_token(user)
+
+    url = reverse(viewname=view_name, kwargs={"encoded_pk": encoded_pk, "token": token})
+
+    link = f"{request.scheme}://{request.get_host()}{url}"
+    return link
