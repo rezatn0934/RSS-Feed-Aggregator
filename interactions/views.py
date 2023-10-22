@@ -79,11 +79,20 @@ class RecommendationRetrieveView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        recommendation = Recommendation.objects.filter(user=request.user).order_by('-count').first()
+        user_subscriptions = Subscription.objects.filter(user=request.user)
 
-        if recommendation:
+        recommendations = (
+            Recommendation.objects
+            .filter(user=request.user)
+            .exclude(category__channel__in=Subquery(user_subscriptions.values('channel_id')))
+            .order_by('-count')
+        )
+
+        if recommendations.exists():
+            recommendation = recommendations.first()
             channels = Channel.objects.filter(category=recommendation.category)[:5]
             serializer = ChannelSerializer(channels, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({_("message"): _("No recommendations available for this user.")}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": _("No recommendations available for this user.")},
+                            status=status.HTTP_404_NOT_FOUND)
