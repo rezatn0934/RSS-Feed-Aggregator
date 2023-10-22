@@ -22,7 +22,8 @@ COPY . /code/
 
 EXPOSE 8000
 
-CMD python manage.py makemessages --all && \
+CMD python manage.py search_index --populate && \
+    python manage.py makemessages --all && \
     python manage.py compilemessages && \
     python manage.py makemigrations && \
     python manage.py migrate && \
