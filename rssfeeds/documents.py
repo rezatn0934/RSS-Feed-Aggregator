@@ -7,6 +7,12 @@ from django_elasticsearch_dsl.registries import registry
 
 
 class BaseDocument(DocType):
+    class Index:
+        name = None
+        settings = {
+            'number_of_shards': 5,
+            'number_of_replicas': 1,
+        }
 
     id = fields.IntegerField(attr='id')
     title = fields.TextField(
