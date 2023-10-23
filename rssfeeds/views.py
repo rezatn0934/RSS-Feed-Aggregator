@@ -12,7 +12,11 @@ from .mixins import AuthenticationMixin
 from .serializers import (
     ChannelSerializer,
     NewsSerializer,
-    XmlLinkSerializer, ChannelDocumentSerializer,
+    XmlLinkSerializer,
+    ChannelDocumentSerializer,
+    PodcastSerializer,
+    PodcastDocumentSerializer,
+    NewsDocumentSerializer
 )
 from django_elasticsearch_dsl_drf.constants import (
     LOOKUP_FILTER_RANGE,
@@ -28,12 +32,11 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     IdsFilterBackend,
     OrderingFilterBackend,
     DefaultOrderingFilterBackend,
-    SearchFilterBackend, CompoundSearchFilterBackend,
+    CompoundSearchFilterBackend,
 )
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 
-from .documents import ChannelDocument, PodcastDocument
-from .serializers import PodcastSerializer, PodcastDocumentSerializer
+from .documents import ChannelDocument, PodcastDocument, NewsDocument
 
 from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
@@ -232,6 +235,52 @@ class PodcastDocumentView(BaseDocumentViewSet):
     ordering = ('id', 'title', 'pub_date')
 
 
+class NewsDocumentView(BaseDocumentViewSet):
+    """The BookDocument view."""
+
+    document = NewsDocument
+    serializer_class = NewsDocumentSerializer
+    lookup_field = 'id'
+    filter_backends = [
+        FilteringFilterBackend,
+        IdsFilterBackend,
+        OrderingFilterBackend,
+        DefaultOrderingFilterBackend,
+        CompoundSearchFilterBackend,
+    ]
+
+    search_fields = {
+        'channel.title': {'fuzziness': 'AUTO'},
+        'title': {'fuzziness': 'AUTO'},
+    }
+    filter_fields = {
+        'id': {
+            'field': '_id',
+            'lookups': [
+                LOOKUP_FILTER_RANGE,
+                LOOKUP_QUERY_IN,
+                LOOKUP_QUERY_GT,
+                LOOKUP_QUERY_GTE,
+                LOOKUP_QUERY_LT,
+                LOOKUP_QUERY_LTE,
+                LOOKUP_QUERY_CONTAINS,
+            ],
+        },
+        'title': 'title.raw',
+        'pub_date': 'pub_date',
+        'channel.title': 'channel.title.raw',
+    }
+
+    ordering_fields = {
+        'id': 'id',
+        'title': 'title.raw',
+        'channel.title': 'channel.title.raw',
+        'pub_date': 'pub_date',
+    }
+
+    ordering = ('id', 'title', 'pub_date')
+
+
 class ChannelDocumentView(BaseDocumentViewSet):
     """The BookDocument view."""
 
@@ -284,4 +333,3 @@ class ChannelDocumentView(BaseDocumentViewSet):
     }
 
     ordering = ('id', 'title', 'last_update')
-
