@@ -59,7 +59,7 @@ class UserRegister(APIView):
         return Response(ser_data.data, status=status.HTTP_201_CREATED)
 
 
-class GenerateUserRegisterTonEmail(APIView):
+class GenerateUserRegisterEmail(APIView):
     permission_classes = (AllowAny,)
     serializer_class = UserLoginSerializer
 
