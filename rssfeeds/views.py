@@ -12,7 +12,7 @@ from .mixins import AuthenticationMixin
 from .serializers import (
     ChannelSerializer,
     NewsSerializer,
-    XmlLinkSerializer,
+    XmlLinkSerializer, ChannelDocumentSerializer,
 )
 from django_elasticsearch_dsl_drf.constants import (
     LOOKUP_FILTER_RANGE,
@@ -28,11 +28,11 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     IdsFilterBackend,
     OrderingFilterBackend,
     DefaultOrderingFilterBackend,
-    SearchFilterBackend,
+    SearchFilterBackend, CompoundSearchFilterBackend,
 )
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 
-from .documents import PodcastDocument
+from .documents import ChannelDocument, PodcastDocument
 from .serializers import PodcastSerializer, PodcastDocumentSerializer
 
 from .models import Channel, XmlLink, Podcast, News
@@ -230,3 +230,58 @@ class PodcastDocumentView(BaseDocumentViewSet):
     }
 
     ordering = ('id', 'title', 'pub_date')
+
+
+class ChannelDocumentView(BaseDocumentViewSet):
+    """The BookDocument view."""
+
+    document = ChannelDocument
+    serializer_class = ChannelDocumentSerializer
+    lookup_field = 'id'
+    filter_backends = [
+        FilteringFilterBackend,
+        IdsFilterBackend,
+        OrderingFilterBackend,
+        DefaultOrderingFilterBackend,
+        SearchFilterBackend,
+        CompoundSearchFilterBackend,
+    ]
+
+    search_fields = (
+        'subtitle',
+        'title',
+        'description',
+        'author',
+    )
+
+    filter_fields = {
+        'id': {
+            'field': '_id',
+            'lookups': [
+                LOOKUP_FILTER_RANGE,
+                LOOKUP_QUERY_IN,
+                LOOKUP_QUERY_GT,
+                LOOKUP_QUERY_GTE,
+                LOOKUP_QUERY_LT,
+                LOOKUP_QUERY_LTE,
+                LOOKUP_QUERY_CONTAINS,
+            ],
+        },
+        'title': 'title.raw',
+        'subtitle': 'subtitle.raw',
+        'description': 'description.raw',
+        'language': 'language',
+        'author': 'author.raw',
+        'category': 'category.name',
+        'owner': 'owner',
+        'last_update': 'last_update',
+    }
+
+    ordering_fields = {
+        'id': 'id',
+        'title': 'title.raw',
+        'last_update': 'last_update',
+    }
+
+    ordering = ('id', 'title', 'last_update')
+
