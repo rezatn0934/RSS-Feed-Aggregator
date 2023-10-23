@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
-from .documents import PodcastDocument
+from .documents import PodcastDocument, ChannelDocument, NewsDocument
 from interactions.models import Like, BookMark, Comment, Subscription
 from interactions.serializers import CommentSerializer
 from .models import XmlLink, Channel, Podcast, News
@@ -95,29 +95,31 @@ class PodcastDocumentSerializer(DocumentSerializer):
             'id',
             'title',
             'channel',
-            'guid',
-            'description',
             'pub_date',
             'subtitle',
+            'description',
+            'duration',
+            'audio_file',
             'explicit',
         )
 
 
 class NewsDocumentSerializer(DocumentSerializer):
     class Meta:
-        document = PodcastDocument
+        document = NewsDocument
         fields = (
             'id',
             'title',
             'channel',
-            'guid',
             'pub_date',
+            'source',
+            'link',
         )
 
 
 class ChannelDocumentSerializer(DocumentSerializer):
     class Meta:
-        document = PodcastDocument
+        document = ChannelDocument
         fields = (
             'id',
             'title',
@@ -125,8 +127,10 @@ class ChannelDocumentSerializer(DocumentSerializer):
             'last_update',
             'language',
             'subtitle',
+            'image'
             'author',
+            'xml_link',
             'category',
             'owner',
-            'pub_date',
+            'author'
         )
