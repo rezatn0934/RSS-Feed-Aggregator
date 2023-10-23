@@ -20,8 +20,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         del validated_data['password2']
         user = User.objects.create_user(**validated_data)
-        user.is_active = False
-        user.save()
         return user
 
     def validate(self, attrs):
