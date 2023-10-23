@@ -194,15 +194,15 @@ class PodcastDocumentView(BaseDocumentViewSet):
         IdsFilterBackend,
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
-        SearchFilterBackend,
+        CompoundSearchFilterBackend,
     ]
 
-    search_fields = (
-        'subtitle',
-        'title',
-        'description',
-        'channel.title',
-    )
+    search_fields = {
+        'subtitle': {'fuzziness': 'AUTO'},
+        'title': {'fuzziness': 'AUTO'},
+        'description': {'fuzziness': 'AUTO'},
+        'channel.title': {'fuzziness': 'AUTO'},
+    }
 
     filter_fields = {
         'id': {
