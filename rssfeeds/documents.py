@@ -1,12 +1,14 @@
 from django_elasticsearch_dsl.documents import DocType
+from elasticsearch_dsl import analyzer
 
 from .models import Channel, Podcast, News
 
-from django_elasticsearch_dsl import Document, fields
+from django_elasticsearch_dsl import Document, fields, Index
 from django_elasticsearch_dsl.registries import registry
 
 
 class BaseDocument(DocType):
+
     class Index:
         name = None
         settings = {
@@ -51,12 +53,20 @@ class ChannelDocument(Document):
     )
     id = fields.IntegerField(attr='id')
 
-    description = fields.TextField()
+    description = fields.TextField(
+        fields={'raw': fields.KeywordField()},
+        analyzer='standard',
+    )
+
     last_update = fields.DateField()
     language = fields.KeywordField()
-    subtitle = fields.TextField()
+    subtitle = fields.TextField(
+        fields={'raw': fields.KeywordField()},
+        analyzer='standard',)
     image = fields.KeywordField()
-    author = fields.TextField()
+    author = fields.TextField(
+        fields={'raw': fields.KeywordField()},
+        analyzer='standard',)
     xml_link = fields.ObjectField(properties={
         'xml_link': fields.KeywordField(),
         'rss_type': fields.ObjectField(properties={
@@ -75,10 +85,10 @@ class ChannelDocument(Document):
         return super().get_queryset().prefetch_related('xml_link__rss_type', 'category')
 
     def prepare_category(self, instance):
+        category_names = [category.name for category in instance.category.all()]
         return {
-            'name': instance.category.name,
+            'name': category_names,
         }
-
     def prepare_xml_link(self, instance):
         return {
             'xml_link': instance.xml_link.xml_link,
@@ -102,10 +112,7 @@ class PodcastDocument(BaseDocument):
         analyzer='standard', )
     duration = fields.KeywordField()
     audio_file = fields.KeywordField()
-    explicit = fields.BooleanField(
-        attr='explicit',
-        analyzer='standard',
-    )
+    explicit = fields.BooleanField()
 
     class Django:
         model = Podcast
