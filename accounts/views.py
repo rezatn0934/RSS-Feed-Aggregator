@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth import authenticate
 from django.core.cache import caches
 from django.utils.translation import gettext_lazy as _
 
@@ -56,6 +57,27 @@ class UserRegister(APIView):
 
         publish_event(event_type='register', queue_name='register', data=data)
         return Response(ser_data.data, status=status.HTTP_201_CREATED)
+
+
+class GenerateUserRegisterTonEmail(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = UserLoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_identifier = serializer.validated_data.get('user_identifier')
+        password = serializer.validated_data.get('password')
+
+        user = AuthBackend().authenticate(request, username=user_identifier, password=password)
+
+        if user.is_registered:
+            return Response({'message': _("Your account is already active")})
+
+        active_link = generate_link(request=request, user=user, view_name='accounts:activate-user')
+        send_email_task.delay(active_link, user.email)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserLogin(APIView):
