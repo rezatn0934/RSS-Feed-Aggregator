@@ -6,11 +6,13 @@ from abc import ABC, abstractmethod
 from interactions.models import Notification, Subscription, ActivityLog
 from rssfeeds.models import Channel
 from .models import User
+import logging
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+logger = logging.getLogger('elastic-logger')
 
 
-class EventConsumer(ABC):
+class EventConsumer(ABC):  # BaseEventConsumer
     """
     EventConsumer is an abstract base class defining the common structure for event consumers.
     Concrete event consumer classes will extend this and provide their own callback implementations.
@@ -52,7 +54,7 @@ class EventConsumer(ABC):
             queue_name (str): The name of the queue to consume events from.
         """
         self.declare_queue(queue_name=queue_name)
-        self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback, auto_ack=True)
+        self.channel.basic_consume(queue=queue_name, on_message_callback=self.callback)
         self.channel.start_consuming()
 
     @abstractmethod
@@ -158,18 +160,28 @@ class UserEventConsumer(EventConsumer):
         user_id = data['user_id']
         user = User.objects.get(id=user_id)
         message = data['data']
+        try:
+            if self.event_type in ['login', 'register']:
+                notification = Notification.objects.create(
+                    title=self.event_type,
+                    notification_type='info',
+                    message=message
+                )
+                notification.recipients.add(user)
+                data = {
+                    'event': f'consumer.{self.event_type}',
+                    'message': f'{notification}'
+                }
+                logger.info(json.dumps(data))
 
-        if self.event_type in ['login', 'register']:
-            notification = Notification.objects.create(
-                title=self.event_type,
-                notification_type='info',
-                message=message
-            )
-            notification.recipients.add(user)
-
-            notification.save()
-
-        ActivityLog.objects.update_or_create(actor=user, action_type=self.event_type, remark=message)
+                notification.save()
+            ActivityLog.objects.update_or_create(user=user, action_type=self.event_type, defaults={'remarks': message})
+        except Exception as e:
+            data = {
+                'event': f'consumer.{self.event_type}',
+                'message': str(e)
+            }
+            logger.error(json.dumps(data))
 
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
         print(f"Received event: {self.event_type} for user: {user.username}")
@@ -206,16 +218,29 @@ class UpdateRSSConsumer(EventConsumer):
         channel_id = data['channel_id']
         message = data['data']
         subscribers = Subscription.objects.filter(channel=Channel.objects.get(id=channel_id))
+        try:
+            if subscribers.exists():
+                notification = Notification.objects.create(
+                    title=self.event_type,
+                    notification_type='info',
+                    message=message
+                )
 
-        notification = Notification.objects.create(
-            title=self.event_type,
-            notification_type='info',
-            message=message
-        )
+                for subscriber in subscribers:
+                    user = User.objects.get(id=subscriber.user_id)
+                    notification.recipients.add(user)
 
-        for subscriber in subscribers:
-            user = User.objects.get(id=subscriber.user_id)
-            notification.recipients.add(user)
+                notification.save()
+                data = {
+                    'event': f'consumer.{self.event_type}',
+                    'message': f'{notification}'
+                }
+                logger.error(json.dumps(data))
+        except Exception as e:
+            data = {
+                'event': f'consumer.{self.event_type}',
+                'message': str(e)
+            }
+            logger.error(json.dumps(data))
 
-        notification.save()
         self.channel.basic_ack(delivery_tag=method.delivery_tag)

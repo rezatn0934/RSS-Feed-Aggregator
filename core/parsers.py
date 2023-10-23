@@ -1,3 +1,4 @@
+import json
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from abc import ABC, abstractmethod
@@ -225,7 +226,9 @@ class PodcastParser(Parser):
                 'explicit': explicit
             }
         else:
-            logger.warning(f"Missing audio_file, or guid for Podcast {title}.")
+            log_data = {'event': f'parser.podcast.{title}',
+                        'message': f"Missing audio_file, or guid for Podcast {title}."}
+            logger.warning(json.dumps(log_data))
             return None
 
 
@@ -266,5 +269,7 @@ class NewsParser(Parser):
                 'source': source
             }
         else:
-            logger.warning(f"Missing audio_file, or guid for News {title}.")
+            log_data = {'event': f'parser.news.{title}',
+                        'message': f"Missing audio_file, or guid for News {title}."}
+            logger.warning(json.dumps(log_data))
             return None

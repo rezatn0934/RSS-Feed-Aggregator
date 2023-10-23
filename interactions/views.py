@@ -1,3 +1,7 @@
+from django.db import IntegrityError
+from django.db.models import Subquery
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -19,6 +23,8 @@ class LikeView(InteractionMixin, APIView):
 
 class CommentView(InteractionMixin, APIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ['post']
+    multi_object = True
 
     def post(self, request):
         content = request.data.get('content')
@@ -38,7 +44,10 @@ class SubscriptionView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            serializer.save()
+        except IntegrityError as e:
+            return Response({'message': _("Subscription already exists.")}, status=status.HTTP_400_BAD_REQUEST)
 
         channel = serializer.validated_data['channel']
         user = request.user
@@ -48,13 +57,23 @@ class SubscriptionView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
-        subscription = self.get_object()
+        channel_id = request.data.get('channel_id')
+        if channel_id is None:
+            return Response({'message': _("Missing channel_id in request body.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription = Subscription.objects.get(user=request.user, channel_id=channel_id)
+        except Subscription.DoesNotExist:
+            return Response({'message': _("Subscription does not exist.")}, status=status.HTTP_404_NOT_FOUND)
+
         channel = subscription.channel
         user = request.user
-        categories = channel.categories.all()
+        categories = channel.category.all()
 
         update_recommendations(user=user, categories=categories, increment_count=-1)
-        return Response({'message': f"Your object has been deleted ."}, status=status.HTTP_200_OK)
+
+        subscription.delete()
+        return Response({'message': _("Your object has been deleted.")}, status=status.HTTP_200_OK)
 
 
 class RecommendationRetrieveView(APIView):
@@ -62,11 +81,20 @@ class RecommendationRetrieveView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        recommendation = Recommendation.objects.filter(user=request.user).order_by('-count').first()
+        user_subscriptions = Subscription.objects.filter(user=request.user)
 
-        if recommendation:
+        recommendations = (
+            Recommendation.objects
+            .filter(user=request.user)
+            .exclude(category__channel__in=Subquery(user_subscriptions.values('channel_id')))
+            .order_by('-count')
+        )
+
+        if recommendations.exists():
+            recommendation = recommendations.first()
             channels = Channel.objects.filter(category=recommendation.category)[:5]
             serializer = ChannelSerializer(channels, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": "No recommendations available for this user."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": _("No recommendations available for this user.")},
+                            status=status.HTTP_404_NOT_FOUND)

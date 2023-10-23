@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import sys
 from datetime import timedelta
 from pathlib import Path
-
+from django.utils.translation import gettext_lazy as _
 from celery.schedules import crontab
 from dotenv import load_dotenv
 import os
@@ -43,7 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
     'drf_spectacular',
+    'django_celery_beat',
+    'rosetta',
     'accounts',
     'core',
     'interactions',
@@ -53,6 +57,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -117,7 +122,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
+LANGUAGES = [
+    ('fa', _('Persian')),
+    ('en', _('English')),
+]
 TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
@@ -133,6 +143,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+PASSWORD_RESET_TIMEOUT = 60*60*24
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -183,7 +194,9 @@ RABBITMQ_PASSWORD = os.environ.get("RABBITMQ_DEFAULT_PASS")
 CELERY_TASK_TRACK_STARTED = True
 CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/'
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/3"
-CELERY_TIME_ZONE = 'Asi/Tehran'
+CELERY_TIME_ZONE = 'Asia/Tehran'
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CELERY_BEAT_SCHEDULE = {
     'update_rssfeeds': {
@@ -213,6 +226,11 @@ LOGGING = {
 }
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST')
 ELASTICSEARCH_PORT = os.environ.get('ELASTICSEARCH_PORT')
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': f'http://{ELASTICSEARCH_HOST}:{ELASTICSEARCH_PORT}'
+    },
+}
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
 EMAIL_HOST = os.environ.get('EMAIL_HOST')

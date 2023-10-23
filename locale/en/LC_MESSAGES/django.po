@@ -1,0 +1,196 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-23 18:42+0330\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: accounts/authentication.py:141
+msgid "Expired token, please login again."
+msgstr ""
+
+#: accounts/authentication.py:149
+msgid "User id not found"
+msgstr ""
+
+#: accounts/authentication.py:154
+msgid "User Not Found"
+msgstr ""
+
+#: accounts/authentication.py:157
+msgid "User is inactive"
+msgstr ""
+
+#: accounts/authentication.py:166
+msgid "Invalid token, please login again."
+msgstr ""
+
+#: accounts/authentication.py:177
+msgid "Token prefix missing"
+msgstr ""
+
+#: accounts/authentication.py:186
+msgid "Access token expired"
+msgstr ""
+
+#: accounts/manager.py:8
+msgid "Users must have an Email"
+msgstr ""
+
+#: accounts/models.py:10
+msgid "Username"
+msgstr ""
+
+#: accounts/models.py:11
+msgid "Email"
+msgstr ""
+
+#: accounts/models.py:12
+msgid "First Name"
+msgstr ""
+
+#: accounts/models.py:13
+msgid "Last Name"
+msgstr ""
+
+#: accounts/models.py:18
+msgid "Joined Date"
+msgstr ""
+
+#: accounts/models.py:19
+msgid "Last Modify"
+msgstr ""
+
+#: accounts/permisions.py:6
+msgid "Permission denied, you do not have permission to perform this action."
+msgstr ""
+
+#: accounts/serilizers.py:27 accounts/serilizers.py:53
+#: accounts/serilizers.py:63
+msgid "Passwords must match!"
+msgstr ""
+
+#: accounts/serilizers.py:68
+msgid "Missing data."
+msgstr ""
+
+#: accounts/serilizers.py:73
+msgid "The reset token is invalid"
+msgstr ""
+
+#: accounts/views.py:75
+msgid "Your account is already active"
+msgstr ""
+
+#: accounts/views.py:111
+msgid "Invalid Credentials"
+msgstr ""
+
+#: accounts/views.py:114
+msgid "Your account is inactive"
+msgstr ""
+
+#: accounts/views.py:117
+msgid "Your account is not active yet"
+msgstr ""
+
+#: accounts/views.py:207
+msgid "Successful Logout"
+msgstr ""
+
+#: accounts/views.py:282
+msgid "password successfully changed"
+msgstr ""
+
+#: accounts/views.py:283
+msgid "Your old password is wrong"
+msgstr ""
+
+#: accounts/views.py:326
+msgid "Your password reset password link were emailed"
+msgstr ""
+
+#: accounts/views.py:332
+msgid "User doesn't exists"
+msgstr ""
+
+#: config/settings.py:128
+msgid "Persian"
+msgstr ""
+
+#: config/settings.py:129
+msgid "English"
+msgstr ""
+
+#: interactions/mixins.py:34 interactions/mixins.py:71
+msgid "Channel not found."
+msgstr ""
+
+#: interactions/mixins.py:36 interactions/mixins.py:73
+msgid "Item not found."
+msgstr ""
+
+#: interactions/mixins.py:38 interactions/mixins.py:75
+msgid "Content type not found."
+msgstr ""
+
+#: interactions/mixins.py:49
+msgid "You've already interacted with this item."
+msgstr ""
+
+#: interactions/mixins.py:59
+msgid "Your interaction was successful."
+msgstr ""
+
+#: interactions/mixins.py:84
+msgid "Your interaction has been removed."
+msgstr ""
+
+#: interactions/mixins.py:86
+msgid "Interaction not found. You haven't interacted with this item."
+msgstr ""
+
+#: interactions/views.py:50
+msgid "Subscription already exists."
+msgstr ""
+
+#: interactions/views.py:62
+msgid "Missing channel_id in request body."
+msgstr ""
+
+#: interactions/views.py:67
+msgid "Subscription does not exist."
+msgstr ""
+
+#: interactions/views.py:76
+msgid "Your object has been deleted."
+msgstr ""
+
+#: interactions/views.py:99
+msgid "No recommendations available for this user."
+msgstr ""
+
+#: rssfeeds/views.py:76
+msgid "Your request is processing"
+msgstr ""
+
+#: rssfeeds/views.py:84
+msgid "RSS Feeds have been updated"
+msgstr ""
+
+#: rssfeeds/views.py:129
+msgid "channel has no item"
+msgstr ""

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 import json
 import logging
 
@@ -33,7 +34,7 @@ def create_or_update_categories(categories_data):
 
 
 def create_or_update_channel(xml_link, channel_data):
-    status = 'create'
+    status = 'created'
     channel, created = Channel.objects.get_or_create(xml_link=xml_link, defaults=channel_data)
     last_update = channel_data.get('last_update')
     if not created:
@@ -41,7 +42,7 @@ def create_or_update_channel(xml_link, channel_data):
             for key, value in channel_data.items():
                 setattr(channel, key, value)
             channel.save()
-            status = 'update'
+            status = 'updated'
         else:
             status = 'exist'
     return channel, status
@@ -56,12 +57,11 @@ def create_items(model, channel, podcast_data):
 logger = logging.getLogger('elastic-logger')
 
 
-def log_task_info(task_name, level, message, task_id, args, kwargs, retval=' ', exception=' ', retry_count=' ',
-                  max_retries=' ', retry_eta=' '):
+def log_task_info(task_name, level, message, task_id, args, kwargs, retval='', exception='', retry_count='',
+                  max_retries='', retry_eta=''):
 
     log_data = {
         'event': f'CeleryTask.{task_name}',
-        'level': level,
         'message': message,
         'task_id': task_id,
         'task_name': task_name,

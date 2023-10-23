@@ -1,9 +1,21 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
+
+from .documents import PodcastDocument, ChannelDocument, NewsDocument
 from interactions.models import Like, BookMark, Comment, Subscription
 from interactions.serializers import CommentSerializer
 from .models import XmlLink, Channel, Podcast, News
+
+
+class XmlLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = XmlLink
+        fields = ['id', 'xml_link', 'rss_type']
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
 
 
 class ChannelSerializer(serializers.ModelSerializer):
@@ -74,3 +86,51 @@ class NewsSerializer(BaseItemSerializer):
     class Meta(BaseItemSerializer.Meta):
         model = News
         fields = BaseItemSerializer.Meta.fields + ['source', 'link']
+
+
+class PodcastDocumentSerializer(DocumentSerializer):
+    class Meta:
+        document = PodcastDocument
+        fields = (
+            'id',
+            'title',
+            'channel',
+            'pub_date',
+            'subtitle',
+            'description',
+            'duration',
+            'audio_file',
+            'explicit',
+        )
+
+
+class NewsDocumentSerializer(DocumentSerializer):
+    class Meta:
+        document = NewsDocument
+        fields = (
+            'id',
+            'title',
+            'channel',
+            'pub_date',
+            'source',
+            'link',
+        )
+
+
+class ChannelDocumentSerializer(DocumentSerializer):
+    class Meta:
+        document = ChannelDocument
+        fields = (
+            'id',
+            'title',
+            'description',
+            'last_update',
+            'language',
+            'subtitle',
+            'image'
+            'author',
+            'xml_link',
+            'category',
+            'owner',
+            'author'
+        )

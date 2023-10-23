@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from accounts.consumers import UserEventConsumer, UpdateRSSConsumer, Context
+from accounts.consumers import UserEventConsumer, Context
 import threading
 
 
@@ -13,7 +13,8 @@ class Command(BaseCommand):
         python manage.py launch_consumers
     """
 
-    help = 'Launches Consumers for login, register, and update_rss messages using RabbitMQ.'
+    help = ('Launches Consumers for login, register, logout, change_pass, forget_pass, and reset_password events using '
+            'RabbitMQ.')
 
     def handle(self, *args, **options):
         """
@@ -24,8 +25,8 @@ class Command(BaseCommand):
             options: Additional command-line options.
         """
 
-        event_types = ['login', 'register', 'logout', 'change_pass', 'forget_pass', 'reset_password', 'update_rss']
-        queue_names = ['login', 'register', 'logout', 'change_pass', 'forget_pass', 'reset_password', 'update_rss']
+        event_types = ['login', 'register', 'logout', 'change_pass', 'forget_pass', 'reset_password']
+        queue_names = ['login', 'register', 'logout', 'change_pass', 'forget_pass', 'reset_password']
 
         consumers = [UserEventConsumer(event_type=event_type) for event_type in event_types]
 
