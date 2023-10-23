@@ -8,6 +8,7 @@ router.register('channels', views.ChannelViewSet)
 router.register('podcasts', views.PodcastViewSet)
 router.register('news', views.NewsViewSet)
 router.register('podcast', views.PodcastDocumentView, basename='podcast-document')
+router.register('channel', views.ChannelDocumentView, basename='channel-document')
 
 app_name = 'rssfeeds'
 urlpatterns = [
