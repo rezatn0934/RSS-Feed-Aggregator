@@ -270,7 +270,36 @@ class PodcastDocumentView(BaseDocumentViewSet):
 
 
 class NewsDocumentView(BaseDocumentViewSet):
-    """The BookDocument view."""
+    """
+    A view for searching and retrieving News documents.
+
+    This view allows users to search and retrieve News documents using Elasticsearch DSL.
+    It provides advanced searching and filtering capabilities, such as searching by title,
+    and sorting by various fields. Additionally, it supports fuzzy searching for improved
+    search accuracy.
+
+    Attributes:
+        document (Type[NewsDocument]): The Elasticsearch document type for News.
+        serializer_class (Type[NewsDocumentSerializer]): The serializer class for News documents.
+        lookup_field (str): The field used for looking up individual News documents.
+        filter_backends (list): The list of filter backends used for querying and filtering data.
+
+    Search Fields:
+        - 'channel.title': Supports fuzzy searching for channel titles.
+        - 'title': Supports fuzzy searching for News titles.
+
+    Filter Fields:
+        - 'id': Filtering options for News IDs.
+        - 'title': Filtering by exact News title.
+        - 'pub_date': Filtering by publication date.
+        - 'channel.title': Filtering by exact channel title.
+
+    Ordering Fields:
+        - 'id': Orders results by News ID.
+        - 'title': Orders results by News title.
+        - 'channel.title': Orders results by channel title.
+        - 'pub_date': Orders results by publication date.
+    """
 
     document = NewsDocument
     serializer_class = NewsDocumentSerializer
