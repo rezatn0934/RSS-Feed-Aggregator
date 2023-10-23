@@ -106,9 +106,16 @@ class UserLogin(APIView):
         user_identifier = serializer.validated_data.get('user_identifier')
         password = serializer.validated_data.get('password')
 
-        user = AuthBackend().authenticate(request, username=user_identifier, password=password)
+        user = authenticate(request, username=user_identifier, password=password)
         if user is None:
-            return Response({_('message'): _('Invalid Credentials')}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': _('Invalid Credentials')}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.is_active:
+            return Response({'message': _("Your account is inactive")}, status=status.HTTP_403_FORBIDDEN)
+
+        if not user.is_registered:
+            return Response({'message': _("Your account is not active yet")}, status=status.HTTP_401_UNAUTHORIZED)
+
         device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
         data = {
             'user_id': user.id,
