@@ -57,12 +57,11 @@ def create_items(model, channel, podcast_data):
 logger = logging.getLogger('elastic-logger')
 
 
-def log_task_info(task_name, level, message, task_id, args, kwargs, retval=' ', exception=' ', retry_count=' ',
-                  max_retries=' ', retry_eta=' '):
+def log_task_info(task_name, level, message, task_id, args, kwargs, retval='', exception='', retry_count='',
+                  max_retries='', retry_eta=''):
 
     log_data = {
         'event': f'CeleryTask.{task_name}',
-        'level': level,
         'message': message,
         'task_id': task_id,
         'task_name': task_name,
