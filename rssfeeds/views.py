@@ -345,7 +345,46 @@ class NewsDocumentView(BaseDocumentViewSet):
 
 
 class ChannelDocumentView(BaseDocumentViewSet):
-    """The BookDocument view."""
+    """
+    A view for searching and retrieving Channel documents.
+
+    This view allows users to search and retrieve Channel documents using Elasticsearch DSL.
+    It provides advanced searching and filtering capabilities, such as searching by title,
+    subtitle, description, author, and sorting by various fields. Additionally, it supports
+    fuzzy searching for improved search accuracy.
+
+    Attributes:
+        document (Type[ChannelDocument]): The Elasticsearch document type for Channels.
+        serializer_class (Type[ChannelDocumentSerializer]): The serializer class for Channel documents.
+        lookup_field (str): The field used for looking up individual Channel documents.
+        filter_backends (list): The list of filter backends used for querying and filtering data.
+
+    Search Fields:
+        - 'subtitle': Supports fuzzy searching for Channel subtitles.
+        - 'title': Supports fuzzy searching for Channel titles.
+        - 'description': Supports fuzzy searching for Channel descriptions.
+        - 'author': Supports fuzzy searching for Channel authors.
+        - 'category.name': Supports fuzzy searching for category names.
+
+    Filter Fields:
+        - 'id': Filtering options for Channel IDs.
+        - 'title': Filtering by exact Channel title.
+        - 'subtitle': Filtering by exact Channel subtitle.
+        - 'description': Filtering by exact Channel description.
+        - 'language': Filtering by language.
+        - 'author': Filtering by exact Channel author.
+        - 'category': Filtering by exact category name.
+        - 'owner': Filtering by owner name.
+        - 'last_update': Filtering by the last update date.
+
+    Ordering Fields:
+        - 'id': Orders results by Channel ID.
+        - 'title': Orders results by Channel title.
+        - 'last_update': Orders results by the last update date.
+
+    Ordering:
+        A tuple specifying the default ordering of results, e.g., ('id', 'title', 'last_update').
+    """
 
     document = ChannelDocument
     serializer_class = ChannelDocumentSerializer
