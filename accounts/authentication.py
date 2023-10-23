@@ -8,6 +8,7 @@ from rest_framework import exceptions
 
 import jwt
 from .utils import decode_jwt
+
 user_model = get_user_model()
 
 
@@ -52,7 +53,7 @@ class AuthBackend(ModelBackend):
             except user_model.DoesNotExist:
                 return None
 
-        return user if (user.check_password(password) and user.is_active) else None
+        return user if user.check_password(password) else None
 
     def get_user(self, user_id):
         user_model = get_user_model()
