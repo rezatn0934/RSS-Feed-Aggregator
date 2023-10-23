@@ -23,6 +23,8 @@ class LikeView(InteractionMixin, APIView):
 
 class CommentView(InteractionMixin, APIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ['post']
+    multi_object = True
 
     def post(self, request):
         content = request.data.get('content')
