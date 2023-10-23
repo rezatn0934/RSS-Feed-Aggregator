@@ -14,6 +14,7 @@ class InteractionMixin:
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     model = None
+    multi_object = False
 
     def post(self, request):
         return self.create_object(request, self.model)
@@ -30,18 +31,22 @@ class InteractionMixin:
         item_model = get_item_model(channel)
         item = item_model.objects.get(id=pk)
         content_type = ContentType.objects.get_for_model(item)
+        if not self.multi_object:
+            interaction, created = model.objects.get_or_create(
+                user=request.user,
+                content_type=content_type,
+                object_id=item.pk,
+                **kwargs
+            )
 
-        interaction, created = model.objects.get_or_create(
-            user=request.user,
-            content_type=content_type,
-            object_id=item.pk,
-            **kwargs
-        )
-
-        if not created:
-            return Response({'message': _("You've already interacted with this item.")},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+            if not created:
+                return Response({'message': _("You've already interacted with this item.")},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            model.objects.create(user=request.user,
+                                 content_type=content_type,
+                                 object_id=item.pk,
+                                 **kwargs)
         categories = channel.category.all()
         update_recommendations(user=request.user, categories=categories, increment_count=1)
         return Response({'message': _("Your interact successfully .")}, status=status.HTTP_200_OK)
