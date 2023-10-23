@@ -51,6 +51,6 @@ def update_rssfeeds(self):
             )
 
     return {
-        'status': _('success'),
+        'status': 'success',
         'message': f'Task {self.name} completed successfully for {len(xml_links)} XML links'
     }
