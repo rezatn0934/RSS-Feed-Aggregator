@@ -7,6 +7,7 @@ urlpatterns = [
     path("activate-user/<str:encoded_pk>/<str:token>/", views.ActivateUserWithToken.as_view(),
          name="activate-user",
          ),
+    path("user_register_email/", views.GenerateUserRegisterEmail.as_view(), name="login"),
     path("login/", views.UserLogin.as_view(), name="login"),
     path('user/', views.UserProfileDetailView.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}),
          name='user-detail'),
