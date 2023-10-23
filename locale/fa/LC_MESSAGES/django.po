@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-22 17:46+0330\n"
-"PO-Revision-Date: 2023-10-22 17:48+0330\n"
+"POT-Creation-Date: 2023-10-23 00:34+0330\n"
+"PO-Revision-Date: 2023-10-23 11:35+0330\n"
 "Last-Translator: None None <admin@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -153,7 +153,6 @@ msgid "Missing channel_id in request body."
 msgstr "شناسه کانال در بدنه درخواست وجود ندارد."
 
 #: interactions/views.py:65
-#| msgid "User doesn't exists"
 msgid "Subscription does not exist."
 msgstr "اشتراک وجود ندارد."
 
@@ -171,15 +170,15 @@ msgstr "هیچ توصیه ای برای این کاربر در دسترس نیس
 msgid "success"
 msgstr "موفق"
 
-#: rssfeeds/views.py:58
+#: rssfeeds/views.py:73
 msgid "Your request is processing"
 msgstr "درخواست شما در حال پردازش است."
 
-#: rssfeeds/views.py:66
+#: rssfeeds/views.py:81
 msgid "RSS Feeds have been updated"
 msgstr "فیدهای RSS به روز شده اند"
 
-#: rssfeeds/views.py:111
+#: rssfeeds/views.py:126
 msgid "channel has no item"
 msgstr "کانال هیچ آیتمی ندارد"
 

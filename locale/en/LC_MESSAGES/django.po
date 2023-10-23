@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-22 17:46+0330\n"
+"POT-Creation-Date: 2023-10-23 00:34+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -167,14 +167,14 @@ msgstr ""
 msgid "success"
 msgstr ""
 
-#: rssfeeds/views.py:58
+#: rssfeeds/views.py:73
 msgid "Your request is processing"
 msgstr ""
 
-#: rssfeeds/views.py:66
+#: rssfeeds/views.py:81
 msgid "RSS Feeds have been updated"
 msgstr ""
 
-#: rssfeeds/views.py:111
+#: rssfeeds/views.py:126
 msgid "channel has no item"
 msgstr ""
