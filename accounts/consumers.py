@@ -6,8 +6,10 @@ from abc import ABC, abstractmethod
 from interactions.models import Notification, Subscription, ActivityLog
 from rssfeeds.models import Channel
 from .models import User
+import logging
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+logger = logging.getLogger('elastic-logger')
 
 
 class EventConsumer(ABC):  # BaseEventConsumer
@@ -158,17 +160,28 @@ class UserEventConsumer(EventConsumer):
         user_id = data['user_id']
         user = User.objects.get(id=user_id)
         message = data['data']
+        try:
+            if self.event_type in ['login', 'register']:
+                notification = Notification.objects.create(
+                    title=self.event_type,
+                    notification_type='info',
+                    message=message
+                )
+                notification.recipients.add(user)
+                data = {
+                    'event': f'consumer.{self.event_type}',
+                    'message': f'{notification}'
+                }
+                logger.info(json.dumps(data))
 
-        if self.event_type in ['login', 'register']:
-            notification = Notification.objects.create(
-                title=self.event_type,
-                notification_type='info',
-                message=message
-            )
-            notification.recipients.add(user)
-
-            notification.save()
-        ActivityLog.objects.update_or_create(user=user, action_type=self.event_type, remarks=message)
+                notification.save()
+            ActivityLog.objects.update_or_create(user=user, action_type=self.event_type, defaults={'remarks': message})
+        except Exception as e:
+            data = {
+                'event': f'consumer.{self.event_type}',
+                'message': str(e)
+            }
+            logger.error(json.dumps(data))
 
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
         print(f"Received event: {self.event_type} for user: {user.username}")
