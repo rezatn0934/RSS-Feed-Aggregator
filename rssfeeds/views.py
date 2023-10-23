@@ -184,7 +184,41 @@ class NewsViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, Retr
 
 
 class PodcastDocumentView(BaseDocumentViewSet):
-    """The BookDocument view."""
+    """
+    A view for searching and retrieving Podcast documents.
+
+    This view allows users to search and retrieve Podcast documents using Elasticsearch DSL.
+    It provides advanced searching and filtering capabilities, such as searching by title,
+    subtitle, description, and sorting by various fields. Additionally, it supports fuzzy
+    searching for improved search accuracy.
+
+    Attributes:
+        document (Type[PodcastDocument]): The Elasticsearch document type for Podcasts.
+        serializer_class (Type[PodcastDocumentSerializer]): The serializer class for Podcast documents.
+        lookup_field (str): The field used for looking up individual Podcasts.
+        filter_backends (list): The list of filter backends used for querying and filtering data.
+
+    Search Fields:
+        - 'subtitle': Supports fuzzy searching for Podcast subtitles.
+        - 'title': Supports fuzzy searching for Podcast titles.
+        - 'description': Supports fuzzy searching for Podcast descriptions.
+        - 'channel.title': Supports fuzzy searching for channel titles.
+
+    Filter Fields:
+        - 'id': Filtering options for Podcast IDs.
+        - 'title': Filtering by exact Podcast title.
+        - 'pub_date': Filtering by publication date.
+        - 'channel': Filtering by exact channel title.
+        - 'subtitle': Filtering by exact Podcast subtitle.
+        - 'description': Filtering by exact Podcast description.
+        - 'explicit': Filtering by explicit content flag.
+
+    Ordering Fields:
+        - 'id': Orders results by Podcast ID.
+        - 'title': Orders results by Podcast title.
+        - 'channel': Orders results by channel title.
+        - 'pub_date': Orders results by publication date.
+    """
 
     document = PodcastDocument
     serializer_class = PodcastDocumentSerializer
