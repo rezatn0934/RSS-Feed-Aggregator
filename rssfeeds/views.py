@@ -292,16 +292,16 @@ class ChannelDocumentView(BaseDocumentViewSet):
         IdsFilterBackend,
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
-        SearchFilterBackend,
         CompoundSearchFilterBackend,
     ]
 
-    search_fields = (
-        'subtitle',
-        'title',
-        'description',
-        'author',
-    )
+    search_fields = {
+        'subtitle': {'fuzziness': 'AUTO'},
+        'title': {'fuzziness': 'AUTO'},
+        'description': {'fuzziness': 'AUTO'},
+        'author': {'fuzziness': 'AUTO'},
+        'category.name': {'fuzziness': 'AUTO'},
+    }
 
     filter_fields = {
         'id': {
