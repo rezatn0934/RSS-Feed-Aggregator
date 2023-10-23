@@ -218,17 +218,29 @@ class UpdateRSSConsumer(EventConsumer):
         channel_id = data['channel_id']
         message = data['data']
         subscribers = Subscription.objects.filter(channel=Channel.objects.get(id=channel_id))
+        try:
+            if subscribers.exists():
+                notification = Notification.objects.create(
+                    title=self.event_type,
+                    notification_type='info',
+                    message=message
+                )
 
-        if subscribers.exists():
-            notification = Notification.objects.create(
-                title=self.event_type,
-                notification_type='info',
-                message=message
-            )
+                for subscriber in subscribers:
+                    user = User.objects.get(id=subscriber.user_id)
+                    notification.recipients.add(user)
 
-            for subscriber in subscribers:
-                user = User.objects.get(id=subscriber.user_id)
-                notification.recipients.add(user)
+                notification.save()
+                data = {
+                    'event': f'consumer.{self.event_type}',
+                    'message': f'{notification}'
+                }
+                logger.error(json.dumps(data))
+        except Exception as e:
+            data = {
+                'event': f'consumer.{self.event_type}',
+                'message': str(e)
+            }
+            logger.error(json.dumps(data))
 
-            notification.save()
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
