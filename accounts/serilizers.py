@@ -119,7 +119,7 @@ class ActiveUserSerializer(serializers.Serializer):
         validate_token_and_encoded_pk(token, encoded_pk)
         validate_token(user, token)
 
-        user.is_active = True
+        user.is_registered = True
         user.save()
 
         request = self.context.get('request')
