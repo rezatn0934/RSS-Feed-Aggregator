@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-23 18:42+0330\n"
+"POT-Creation-Date: 2023-11-09 08:24+0330\n"
 "PO-Revision-Date: 2023-10-23 18:45+0330\n"
 "Last-Translator: None None <admin@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -92,41 +92,46 @@ msgstr "داده وجود ندارد."
 msgid "The reset token is invalid"
 msgstr "رمز بازنشانی نامعتبر است."
 
-#: accounts/views.py:75
+#: accounts/views.py:60
+msgid ""
+"Registration successful. Please check your email to activate your account."
+msgstr ""
+
+#: accounts/views.py:76
 msgid "Your account is already active"
 msgstr "حساب کاربری شما از قبل فعال است."
 
-#: accounts/views.py:111
+#: accounts/views.py:114
 msgid "Invalid Credentials"
 msgstr "اطلاعات کاربری نامعتبر"
 
-#: accounts/views.py:114
+#: accounts/views.py:117
 #, fuzzy
 #| msgid "User is inactive"
 msgid "Your account is inactive"
 msgstr "کاربر غیر فعال است."
 
-#: accounts/views.py:117
+#: accounts/views.py:120
 msgid "Your account is not active yet"
 msgstr "حساب کاربری شما هنوز فعال نشده است."
 
-#: accounts/views.py:207
+#: accounts/views.py:210
 msgid "Successful Logout"
 msgstr "خروج موفق"
 
-#: accounts/views.py:282
+#: accounts/views.py:285
 msgid "password successfully changed"
 msgstr "رمز عبور با موفقیت تغییر کرد."
 
-#: accounts/views.py:283
+#: accounts/views.py:286
 msgid "Your old password is wrong"
 msgstr "رمز عبور قبلی شما اشتباه است."
 
-#: accounts/views.py:326
+#: accounts/views.py:330
 msgid "Your password reset password link were emailed"
 msgstr "لینک رمز عبور بازنشانی شما ایمیل شد."
 
-#: accounts/views.py:332
+#: accounts/views.py:336
 msgid "User doesn't exists"
 msgstr "کاربر وجود ندارد."
 
@@ -200,15 +205,14 @@ msgstr "آبجکت شما حذف شده است."
 msgid "No recommendations available for this user."
 msgstr "هیچ توصیه ای برای این کاربر در دسترس نیست."
 
-#: rssfeeds/views.py:76
+#: rssfeeds/views.py:77
 msgid "Your request is processing"
 msgstr "درخواست شما در حال پردازش است."
 
-#: rssfeeds/views.py:84
+#: rssfeeds/views.py:87
 msgid "RSS Feeds have been updated"
 msgstr "فیدهای RSS به روز شده اند"
 
-#: rssfeeds/views.py:129
+#: rssfeeds/views.py:134
 msgid "channel has no item"
 msgstr "کانال هیچ آیتمی ندارد"
-
