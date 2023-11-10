@@ -40,7 +40,6 @@ class UserRegister(APIView):
         Response: A JSON response indicating success or failure along with appropriate status codes.
     """
 
-
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -48,7 +47,9 @@ class UserRegister(APIView):
         ser_data.is_valid(raise_exception=True)
         user = ser_data.save()
         active_link = generate_link(request=request, user=user, view_name='accounts:activate-user')
-        send_email_task.delay(active_link, user.email)
+        correlation_id = request.headers.get("correlation-id")
+
+        send_email_task.delay(active_link, user.email, correlation_id)
 
         device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
         data = {
@@ -56,7 +57,7 @@ class UserRegister(APIView):
             'data': f'{user.username} has been registered successfully using {device_type}'}
 
         publish_event(event_type='register', queue_name='register', data=data)
-        return Response(ser_data.data, status=status.HTTP_201_CREATED)
+        return Response({'message': _('Registration successful. Please check your email to activate your account.')}, status=status.HTTP_201_CREATED)
 
 
 class GenerateUserRegisterEmail(APIView):
@@ -75,7 +76,9 @@ class GenerateUserRegisterEmail(APIView):
             return Response({'message': _("Your account is already active")})
 
         active_link = generate_link(request=request, user=user, view_name='accounts:activate-user')
-        send_email_task.delay(active_link, user.email)
+        correlation_id = request.headers.get("correlation-id")
+
+        send_email_task.delay(active_link, user.email, correlation_id)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -114,7 +117,7 @@ class UserLogin(APIView):
             return Response({'message': _("Your account is inactive")}, status=status.HTTP_403_FORBIDDEN)
 
         if not user.is_registered:
-            return Response({'message': _("Your account is not active yet")}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'message': _("Your account is not active yet")}, status=status.HTTP_403_FORBIDDEN)
 
         device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
         data = {
@@ -311,8 +314,9 @@ class ForgetPassword(APIView):
         if user.exists():
             user = user.get()
             reset_link = generate_link(request=request, user=user, view_name='accounts:change_password_token')
+            correlation_id = request.headers.get("correlation-id")
 
-            send_email_task.delay(reset_link, email)
+            send_email_task.delay(reset_link, email, correlation_id)
             user = request.user
             device_type = request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
             data = {

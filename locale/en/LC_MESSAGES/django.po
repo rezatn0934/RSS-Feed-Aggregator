@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-23 18:42+0330\n"
+"POT-Creation-Date: 2023-11-09 08:24+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,39 +91,44 @@ msgstr ""
 msgid "The reset token is invalid"
 msgstr ""
 
-#: accounts/views.py:75
+#: accounts/views.py:60
+msgid ""
+"Registration successful. Please check your email to activate your account."
+msgstr ""
+
+#: accounts/views.py:76
 msgid "Your account is already active"
 msgstr ""
 
-#: accounts/views.py:111
+#: accounts/views.py:114
 msgid "Invalid Credentials"
 msgstr ""
 
-#: accounts/views.py:114
+#: accounts/views.py:117
 msgid "Your account is inactive"
 msgstr ""
 
-#: accounts/views.py:117
+#: accounts/views.py:120
 msgid "Your account is not active yet"
 msgstr ""
 
-#: accounts/views.py:207
+#: accounts/views.py:210
 msgid "Successful Logout"
 msgstr ""
 
-#: accounts/views.py:282
+#: accounts/views.py:285
 msgid "password successfully changed"
 msgstr ""
 
-#: accounts/views.py:283
+#: accounts/views.py:286
 msgid "Your old password is wrong"
 msgstr ""
 
-#: accounts/views.py:326
+#: accounts/views.py:330
 msgid "Your password reset password link were emailed"
 msgstr ""
 
-#: accounts/views.py:332
+#: accounts/views.py:336
 msgid "User doesn't exists"
 msgstr ""
 
@@ -183,14 +188,14 @@ msgstr ""
 msgid "No recommendations available for this user."
 msgstr ""
 
-#: rssfeeds/views.py:76
+#: rssfeeds/views.py:77
 msgid "Your request is processing"
 msgstr ""
 
-#: rssfeeds/views.py:84
+#: rssfeeds/views.py:87
 msgid "RSS Feeds have been updated"
 msgstr ""
 
-#: rssfeeds/views.py:129
+#: rssfeeds/views.py:134
 msgid "channel has no item"
 msgstr ""
