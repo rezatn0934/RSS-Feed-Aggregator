@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
-
+from rest_framework.pagination import LimitOffsetPagination
 from accounts.authentication import JWTAuthentication
 from .mixins import AuthenticationMixin
 from .serializers import (
@@ -40,7 +40,7 @@ from .documents import ChannelDocument, PodcastDocument, NewsDocument
 
 from .models import Channel, XmlLink, Podcast, News
 from .tasks import xml_link_creation, update_rssfeeds
-
+from accounts.publishers import EventPublisher
 
 class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin,
                      GenericViewSet):
@@ -72,14 +72,17 @@ class XmlLinkViewSet(AuthenticationMixin, CreateModelMixin, DestroyModelMixin, L
         xml_link = request.data.get('xml_link')
         rss_type = request.data.get('rss_type')
         obj, created = XmlLink.objects.get_or_create(xml_link=xml_link, rss_type_id=rss_type)
-        xml_link_creation.delay(obj.xml_link)
+        correlation_id = request.headers.get("correlation-id")
+        xml_link_creation.delay(obj.xml_link, correlation_id)
         return Response({'message': _('Your request is processing')}, status=status.HTTP_201_CREATED)
 
 
 class UpdateRSSFeedsView(AuthenticationMixin, APIView):
 
     def get(self, request):
-        update_rssfeeds.delay()
+        correlation_id = request.headers.get("correlation-id")
+
+        update_rssfeeds.delay(correlation_id)
 
         return Response({'message': _('RSS Feeds have been updated')}, status=status.HTTP_200_OK)
 
@@ -107,13 +110,15 @@ class ChannelViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'last_update', 'description', 'author']
     ordering_fields = ['id', 'title', 'last_update']
+    pagination_class = LimitOffsetPagination
+    page_size = 5
 
     def retrieve(self, request, *args, **kwargs):
         channel = self.get_object()
         items_serializer = None
         items = None
         if hasattr(channel, 'podcast_set') and (len(channel.podcast_set.all()) > 0):
-            items = channel.podcast_set.all()
+            items = channel.podcast_set.all().order_by('-pub_date')
             items_serializer = PodcastSerializer(items, many=True, context={'request': request})
         elif hasattr(channel, 'news_set') and (len(channel.news_set.all()) > 0):
             items = channel.news_set.all()
