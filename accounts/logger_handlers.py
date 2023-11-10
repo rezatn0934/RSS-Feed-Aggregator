@@ -80,5 +80,5 @@ class LogSender:
 
         log_data = json.loads(formatter(msg))
         log_data['timestamp'] = timestamp
-        log_data['level'] = msg.levelname
+        log_data['level'] = msg.levelname.lower()
         self.es.index(index=index_name, document=log_data)
