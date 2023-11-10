@@ -8,7 +8,7 @@ from .models import XmlLink, Channel
 
 
 @shared_task(base=MyTask, bind=True, task_time_limit=60, acks_late=True)
-def xml_link_creation(self, xml_link):
+def xml_link_creation(self, xml_link, correlation_id):
     xml_link = XmlLink.objects.get(xml_link=xml_link)
 
     [parsed_data, model] = parse_data(xml_link)
@@ -27,7 +27,7 @@ def xml_link_creation(self, xml_link):
             'data': f'{channel.title} has been updated'
         }
         publisher = EventPublisher()
-        publisher.publish_event('update_rssfeed', 'update_rss', data=data)
+        publisher.publish_event('update_rss', 'update_rss', data=data)
         publisher.close_connection()
 
     return {
@@ -37,11 +37,11 @@ def xml_link_creation(self, xml_link):
 
 
 @shared_task(base=MyTask, bind=True, soft_time_limit=900, task_time_limit=1000, acks_late=True)
-def update_rssfeeds(self):
+def update_rssfeeds(self, correlation_id):
     xml_links = XmlLink.objects.all()
     for xml_link in xml_links:
         if Channel.objects.filter(xml_link=xml_link).exists():
-            xml_link_creation.delay(xml_link.xml_link)
+            xml_link_creation.delay(xml_link.xml_link, correlation_id)
         else:
             xml_link.delete()  # add is_deleted to model
             log_task_info(
