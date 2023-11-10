@@ -62,6 +62,7 @@ def log_task_info(task_name, level, message, task_id, args, kwargs, retval='', e
 
     log_data = {
         'event': f'CeleryTask.{task_name}',
+        'correlation_id': args[-1],
         'message': message,
         'task_id': task_id,
         'task_name': task_name,

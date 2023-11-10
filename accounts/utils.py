@@ -1,6 +1,7 @@
 import datetime
 import random
 import string
+import uuid
 
 import jwt
 from django.conf import settings
@@ -63,6 +64,12 @@ def custom_sen_mail(subject, message, receiver):
 
 
 def log_entry(request, response, exception=None):
+    correlation_id = request.headers.get("correlation-id")
+    if not correlation_id:
+        correlation_id = uuid.uuid4().hex
+
+    request.META['HTTP_CORRELATION_ID'] = correlation_id
+
     remote_host = request.META.get('REMOTE_ADDR', '')
     user_id = request.user.id if request.user.is_authenticated else ''
     user_info = {
@@ -82,18 +89,19 @@ def log_entry(request, response, exception=None):
         message = str(exception) if exception else 'Request processed successfully'
 
     if request.resolver_match and request.resolver_match.app_names:
-        app_name = request.resolver_match.app_names[0]
+        app_name = request.resolver_match.app_names[0].replace('.', '/')
     else:
         app_name = "unknown_app"
 
     if request.resolver_match and request.resolver_match.url_name:
-        url_name = request.resolver_match.url_name
+        url_name = request.resolver_match.url_name.replace('.', '/')
     else:
         url_name = "unknown_url"
 
-    event = f"{app_name}.{url_name}"
+    event = f"Django/api/{app_name}/{url_name}"
 
     return {
+        'correlation_id': correlation_id,
         'remote_host': remote_host,
         'user_info': user_info,
         'request_line': request_line,
