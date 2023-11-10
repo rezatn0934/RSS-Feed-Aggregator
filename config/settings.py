@@ -172,7 +172,6 @@ CACHES = {
     "auth": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/2",
-        "TIMEOUT": REDIS_CACHE_TTL,
     },
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
